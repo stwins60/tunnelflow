@@ -452,6 +452,100 @@ spec:
             claimName: tunnelflow-data
 ```
 
+### Installing `cloudflared` on Kubernetes
+
+Run `cloudflared` as a Deployment inside your cluster so it connects your Cloudflare Tunnel to in-cluster services.
+
+**1. Get the tunnel token**
+
+From the TunnelFlow dashboard go to **Tunnels → [your tunnel] → Install Token** and copy the token, or fetch it via the API:
+
+```bash
+curl -s https://your-host/api/tunnels/<tunnel-id>/install-token \
+  -H "Authorization: Bearer tfk_<your-key>"
+```
+
+**2. Store the token as a Kubernetes Secret**
+
+```bash
+kubectl create secret generic cloudflared-token \
+  --from-literal=token=<paste-tunnel-token-here>
+```
+
+**3. Deploy `cloudflared`**
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  labels:
+    app: cloudflared
+spec:
+  replicas: 2          # run two replicas for high availability
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+    spec:
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:latest
+          args:
+            - tunnel
+            - --no-autoupdate
+            - run
+            - --token
+            - $(TUNNEL_TOKEN)
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflared-token
+                  key: token
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+```
+
+Apply it:
+
+```bash
+kubectl apply -f cloudflared-deployment.yaml
+```
+
+**4. Verify the connection**
+
+```bash
+kubectl get pods -l app=cloudflared
+kubectl logs -l app=cloudflared --tail=50
+```
+
+You should see `Connected to Cloudflare` in the logs. The tunnel will now appear as **Active** in the TunnelFlow dashboard.
+
+> **Tip:** If you need `cloudflared` running on every node (e.g. to expose node-local services), change `kind: Deployment` to `kind: DaemonSet` and remove the `replicas` field.
+
+---
+
 ### Backup
 
 The entire state is in a single SQLite file. Back it up with:

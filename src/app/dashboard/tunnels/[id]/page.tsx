@@ -219,6 +219,7 @@ export default function TunnelDetailPage() {
               <CopyCode label="Docker (recommended)" code={tokenData.commands.docker} />
               <CopyCode label="systemd (Linux service)" code={tokenData.commands.systemd} />
               <CopyCode label="Direct run" code={tokenData.commands.direct} />
+              <CopyCode label="Kubernetes" code={tokenData.commands.kubernetes} />
             </div>
           ) : null}
           <DialogFooter>

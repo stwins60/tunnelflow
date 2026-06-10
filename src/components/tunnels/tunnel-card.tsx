@@ -34,7 +34,7 @@ export function TunnelCard({ tunnel, onDeleted, onUpdated }: TunnelCardProps) {
   const [tokenDialogOpen, setTokenDialogOpen] = useState(false)
   const [tokenData, setTokenData] = useState<{
     token: string
-    commands: { docker: string; systemd: string; direct: string }
+    commands: { docker: string; systemd: string; direct: string; kubernetes: string }
   } | null>(null)
   const [loadingToken, setLoadingToken] = useState(false)
 
@@ -225,6 +225,7 @@ export function TunnelCard({ tunnel, onDeleted, onUpdated }: TunnelCardProps) {
               <CopyCode label="Docker (recommended)" code={tokenData.commands.docker} />
               <CopyCode label="systemd (Linux service)" code={tokenData.commands.systemd} />
               <CopyCode label="Direct (foreground)" code={tokenData.commands.direct} />
+              <CopyCode label="Kubernetes" code={tokenData.commands.kubernetes} />
               <p className="text-xs text-muted-foreground">
                 After running the install command, the tunnel status will change to Active within a
                 few seconds. Click Sync to refresh.

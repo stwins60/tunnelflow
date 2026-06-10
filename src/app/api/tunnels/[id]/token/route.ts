@@ -50,6 +50,7 @@ export async function GET(request: NextRequest, { params }: Params) {
         docker: `docker run -d --name cloudflared-${tunnel.name} cloudflare/cloudflared:latest tunnel --no-autoupdate run --token ${tunnelToken}`,
         systemd: `curl -L --output cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64\nchmod +x cloudflared\nsudo mv cloudflared /usr/local/bin/\nsudo cloudflared service install ${tunnelToken}`,
         direct: `cloudflared tunnel run --token ${tunnelToken}`,
+        kubernetes: `kubectl create secret generic cloudflared-token --from-literal=token=${tunnelToken}\nkubectl create deployment cloudflared --image=cloudflare/cloudflared:latest -- tunnel --no-autoupdate run --token ${tunnelToken}`,
       },
     })
   } catch (e) {
