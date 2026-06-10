@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // bcrypt hashed — never logged
+  role      String   @default("ADMIN") // ADMIN | VIEWER
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auditLogs AuditLog[]
+}
+
+// Key/value store for app settings (CF credentials, selected zone, etc.)
+// Sensitive values are AES-256-GCM encrypted before storage
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   // encrypted or plain depending on `encrypted` flag
+  encrypted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tunnel {
+  id          String   @id @default(cuid())
+  cfTunnelId  String   @unique  // Cloudflare tunnel UUID
+  name        String
+  accountId   String
+  status      String   @default("inactive") // inactive | active | degraded | error
+  lastSyncAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  servers     Server[]
+}
+
+model Server {
+  id          String   @id @default(cuid())
+  name        String
+  subdomain   String   @unique  // full public hostname e.g. app1.example.com
+  upstream    String            // http://localhost:8080
+  protocol    String   @default("http") // http | https
+  tunnelId    String?
+  tunnel      Tunnel?  @relation(fields: [tunnelId], references: [id], onDelete: SetNull)
+  dnsRecordId String?           // Cloudflare DNS record ID (for cleanup)
+  status      String   @default("pending") // pending | active | error | deleting
+  notes       String?
+  lastSyncAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String   // CREATE_TUNNEL | DELETE_SERVER | UPDATE_DNS | etc.
+  resource   String   // tunnel | server | setting | user
+  resourceId String?
+  details    String?  // JSON, secrets redacted
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+}
