@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        env:
+          DATABASE_URL: file:/tmp/build-test.db
+          ENCRYPTION_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
+          SESSION_SECRET: "ci-session-secret-at-least-32-characters-long"
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: npm run build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "TunnelFlow ${{ github.ref_name }}"
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          body: |
+            ## TunnelFlow ${{ github.ref_name }}
+
+            See the full list of changes in the [CHANGELOG](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) or in the auto-generated release notes below.
+
+            ---
+
+            ### Self-hosted deployment
+
+            ```bash
+            # Clone this tag
+            git clone --branch ${{ github.ref_name }} https://github.com/${{ github.repository }}.git
+            cd tunnelflow
+
+            # Install & build
+            npm ci
+            DATABASE_URL=file:/data/tunnel-manager.db npm run build
+
+            # Configure .env then start
+            npm start
+            ```
+
+            Or with Docker Compose (using the bundled `docker-compose.yml`):
+
+            ```bash
+            git clone --branch ${{ github.ref_name }} https://github.com/${{ github.repository }}.git
+            cd tunnelflow
+            cp .env.example .env   # fill in ENCRYPTION_KEY and SESSION_SECRET
+            docker compose up -d
+            ```

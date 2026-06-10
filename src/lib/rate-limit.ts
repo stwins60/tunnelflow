@@ -70,11 +70,11 @@ export function getRateLimiter(name: string, opts: RateLimitOptions) {
     /** Periodically purge expired entries to prevent unbounded memory growth */
     purge() {
       const now = Date.now()
-      for (const [key, entry] of store.entries()) {
+      Array.from(store.entries()).forEach(([key, entry]) => {
         if (now - entry.windowStart >= opts.windowMs) {
           store.delete(key)
         }
-      }
+      })
     },
   }
 }
