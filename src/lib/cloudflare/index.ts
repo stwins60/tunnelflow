@@ -13,6 +13,12 @@ export * from './dns'
 import { getSetting, SETTING_KEYS } from '@/lib/auth'
 import { db, now } from '@/lib/db'
 import {
+  logDnsRecordCreated,
+  logDnsRecordUpdated,
+  logDnsRecordDeleted,
+  getDnsRecordByCfId,
+} from '@/lib/dns-audit'
+import {
   listTunnels,
   getTunnelConfig,
   normalizeTunnelStatus,
@@ -136,14 +142,47 @@ export async function provisionServer(serverId: string, userId?: string | null):
   const existing = await findDnsRecord(resolvedZoneId, server.subdomain, token)
   let dnsRecordId = existing?.id ?? server.dnsRecordId ?? null
 
+  const resolvedZoneName = zones.find((z) => z.id === resolvedZoneId)?.name ?? null
+
   if (existing) {
-    await updateTunnelDnsRecord(resolvedZoneId, existing.id, server.subdomain, cfTunnelId, token)
+    // Update existing record
+    const updatedRecord = await updateTunnelDnsRecord(resolvedZoneId, existing.id, server.subdomain, cfTunnelId, token)
+    
+    // Log the update
+    const existingDbRecord = getDnsRecordByCfId(existing.id, resolvedZoneId)
+    if (existingDbRecord) {
+      logDnsRecordUpdated({
+        recordId: existingDbRecord.id,
+        cfRecord: updatedRecord,
+        before: existingDbRecord,
+        userId: effectiveUserId,
+      })
+    } else {
+      // Record wasn't tracked, log as creation
+      logDnsRecordCreated({
+        cfRecord: updatedRecord,
+        zoneName: resolvedZoneName,
+        zoneId: resolvedZoneId,
+        serverId: server.id,
+        userId: effectiveUserId,
+      })
+    }
   } else {
+    // Create new record
     const newRecord = await createTunnelDnsRecord(
       { zoneId: resolvedZoneId, name: server.subdomain, tunnelId: cfTunnelId },
       token
     )
     dnsRecordId = newRecord.id
+    
+    // Log the creation
+    logDnsRecordCreated({
+      cfRecord: newRecord,
+      zoneName: resolvedZoneName,
+      zoneId: resolvedZoneId,
+      serverId: server.id,
+      userId: effectiveUserId,
+    })
   }
 
   // 3. Update DB
@@ -192,6 +231,14 @@ export async function deprovisionServer(serverId: string, userId?: string | null
   if (server.dnsRecordId) {
     try {
       await deleteDnsRecord(resolvedZoneId, server.dnsRecordId, token)
+      
+      // Log the deletion
+      logDnsRecordDeleted({
+        cfRecordId: server.dnsRecordId,
+        zoneId: resolvedZoneId,
+        name: server.subdomain,
+        userId: effectiveUserId,
+      })
     } catch (err) {
       console.error(`[cf] Failed to delete DNS record for ${server.subdomain}:`, err)
     }

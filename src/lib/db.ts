@@ -197,6 +197,24 @@ export interface DbCloudflareAccount {
   updatedAt: string
 }
 
+export interface DbDnsRecord {
+  id: string
+  cfRecordId: string        // Cloudflare DNS record ID
+  zoneId: string
+  zoneName: string | null   // e.g. example.com
+  name: string              // FQDN, e.g. app1.example.com
+  type: string              // CNAME, A, AAAA, etc.
+  content: string           // e.g. {tunnelId}.cfargotunnel.com
+  proxied: boolean
+  ttl: number
+  serverId: string | null   // link to Server if applicable
+  userId: string | null
+  status: string            // 'active' | 'deleted'
+  deletedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 // ─── Singleton ────────────────────────────────────────────────────────────────
 
 const DB_URL = process.env.DATABASE_URL ?? 'file:/data/tunnel-manager.db'
@@ -408,6 +426,31 @@ function initSchema(instance: Database.Database): void {
       "updatedAt" TEXT NOT NULL,
       FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS "DnsRecord" (
+      "id"         TEXT NOT NULL PRIMARY KEY,
+      "cfRecordId" TEXT NOT NULL,
+      "zoneId"     TEXT NOT NULL,
+      "zoneName"   TEXT,
+      "name"       TEXT NOT NULL,
+      "type"       TEXT NOT NULL,
+      "content"    TEXT NOT NULL,
+      "proxied"    INTEGER NOT NULL DEFAULT 1,
+      "ttl"        INTEGER NOT NULL DEFAULT 1,
+      "serverId"   TEXT,
+      "userId"     TEXT,
+      "status"     TEXT NOT NULL DEFAULT 'active',
+      "deletedAt"  TEXT,
+      "createdAt"  TEXT NOT NULL,
+      "updatedAt"  TEXT NOT NULL,
+      FOREIGN KEY ("serverId") REFERENCES "Server"("id") ON DELETE SET NULL,
+      FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS "idx_dns_record_cf_id" ON "DnsRecord"("cfRecordId");
+    CREATE INDEX IF NOT EXISTS "idx_dns_record_zone" ON "DnsRecord"("zoneId");
+    CREATE INDEX IF NOT EXISTS "idx_dns_record_server" ON "DnsRecord"("serverId");
+    CREATE INDEX IF NOT EXISTS "idx_dns_record_status" ON "DnsRecord"("status");
   `)
 }
 

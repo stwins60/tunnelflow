@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Key,
   LayoutTemplate,
+  Globe,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -43,6 +44,7 @@ export function Sidebar() {
     { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, adminOnly: false },
     { href: '/dashboard/tunnels', label: 'Tunnels', icon: Network, adminOnly: false },
     { href: '/dashboard/servers', label: 'Servers', icon: Server, adminOnly: false },
+    { href: '/dashboard/dns-records', label: 'DNS Records', icon: Globe, adminOnly: false },
     { href: '/dashboard/notifications', label: 'Notifications', icon: Bell, adminOnly: false },
     { href: '/dashboard/api-keys', label: 'API Keys', icon: Key, adminOnly: false },
     { href: '/dashboard/templates', label: 'Templates', icon: LayoutTemplate, adminOnly: false },
