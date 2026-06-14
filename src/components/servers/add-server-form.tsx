@@ -201,6 +201,10 @@ export function AddServerForm({ defaultTunnelId, onSuccess }: AddServerFormProps
             <SelectContent>
               <SelectItem value="http">HTTP</SelectItem>
               <SelectItem value="https">HTTPS</SelectItem>
+              <SelectItem value="tcp">TCP</SelectItem>
+              <SelectItem value="ssh">SSH</SelectItem>
+              <SelectItem value="rdp">RDP</SelectItem>
+              <SelectItem value="smb">SMB</SelectItem>
             </SelectContent>
           </Select>
         </div>

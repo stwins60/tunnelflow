@@ -125,7 +125,7 @@ export async function provisionServer(serverId: string, userId?: string | null):
   const { token, accountId, zones } = await getCfCredentials(effectiveUserId)
   const cfTunnelId = tunnel.cfTunnelId
   // upstream is stored as a full URL (e.g. "http://host:port"); avoid double-prepending the protocol
-  const service = /^https?:\/\//i.test(server.upstream)
+  const service = /^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\//i.test(server.upstream)
     ? server.upstream
     : `${server.protocol}://${server.upstream}`
 

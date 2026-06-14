@@ -47,8 +47,8 @@ export async function GET(request: NextRequest, { params }: Params) {
 
 const patchSchema = z.object({
   name: z.string().min(1).max(64).optional(),
-  upstream: z.string().regex(/^https?:\/\/.+/).optional(),
-  protocol: z.enum(['http', 'https']).optional(),
+  upstream: z.string().regex(/^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\/.+/).optional(),
+  protocol: z.enum(['http', 'https', 'tcp', 'ssh', 'rdp', 'smb']).optional(),
   tunnelId: z.string().nullable().optional(),
   notes: z.string().max(500).nullable().optional(),
   reprovision: z.boolean().default(false),

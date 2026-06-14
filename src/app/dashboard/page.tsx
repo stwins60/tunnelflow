@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Network, Server, CheckCircle2, AlertCircle, Plus, ArrowRight, Activity, RefreshCw } from 'lucide-react'
+import { Network, Server, CheckCircle2, AlertCircle, Plus, ArrowRight, Activity, RefreshCw, Circle } from 'lucide-react'
 import { Header } from '@/components/layout/header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -62,6 +62,14 @@ export default function DashboardPage() {
         servers: servers.data?.servers ?? [],
         settings: settings.data?.settings ?? {},
       })
+
+      // Auto-run a silent health check so the Healthy card is populated on load
+      if ((servers.data?.servers ?? []).length > 0) {
+        fetch('/api/health-check', { method: 'POST' })
+          .then((r) => r.json())
+          .then((d) => { if (d.ok) setHealth(d.data.summary) })
+          .catch(() => {/* silent — health card will stay at zero */})
+      }
     } catch {
       setError('Failed to load dashboard data')
     } finally {
@@ -158,8 +166,10 @@ export default function DashboardPage() {
                     <span className="text-3xl font-bold">{health.up}</span>
                     <span className="text-muted-foreground text-sm">/{health.total} up</span>
                   </>
-                ) : (
+                ) : totalServers === 0 ? (
                   <span className="text-3xl font-bold text-muted-foreground">—</span>
+                ) : (
+                  <span className="text-3xl font-bold text-muted-foreground animate-pulse">…</span>
                 )}
               </div>
             </CardContent>
@@ -206,25 +216,74 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Quick actions */}
-        {totalTunnels === 0 && (
-          <Card className="border-dashed">
-            <CardContent className="py-10 text-center space-y-3">
-              <Network className="h-10 w-10 text-muted-foreground mx-auto" />
-              <h3 className="font-semibold">No tunnels yet</h3>
-              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Create your first tunnel to start routing traffic from Cloudflare to your servers.
+        {/* First-time onboarding guide */}
+        {totalTunnels === 0 && totalServers === 0 && (
+          <Card className="border-blue-100 bg-blue-50/40">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600">
+                  <Network className="h-4 w-4 text-white" />
+                </div>
+                Getting Started with TunnelFlow
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Follow these steps to route your first service through Cloudflare.
               </p>
-              <Button asChild>
-                <Link href="/dashboard/tunnels">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create First Tunnel
-                </Link>
-              </Button>
+            </CardHeader>
+            <CardContent className="space-y-3 pt-0">
+              {/* Step 1 — done */}
+              <div className="flex items-start gap-3 rounded-lg border border-green-200 bg-white px-4 py-3">
+                <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold line-through text-muted-foreground">Connect Cloudflare</p>
+                  <p className="text-xs text-muted-foreground">API token &amp; zones configured.</p>
+                </div>
+              </div>
+
+              {/* Step 2 — create tunnel */}
+              <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-blue-500 mt-0.5">
+                  <div className="h-2 w-2 rounded-full bg-blue-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">Create a Tunnel</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    A tunnel is a persistent encrypted connection between Cloudflare&apos;s network and your infrastructure. One tunnel can serve multiple services.
+                  </p>
+                  <Button asChild size="sm" className="mt-2 gap-1.5 h-7 text-xs">
+                    <Link href="/dashboard/tunnels">
+                      <Plus className="h-3.5 w-3.5" /> Create Tunnel
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Step 3 — add server */}
+              <div className="flex items-start gap-3 rounded-lg border border-gray-100 bg-white/60 px-4 py-3 opacity-60">
+                <Circle className="h-5 w-5 text-gray-300 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-gray-500">Add a Server</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Map a public hostname (e.g. <code className="font-mono">app.example.com</code>) to an internal service. TunnelFlow creates the DNS record automatically.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 4 — go live */}
+              <div className="flex items-start gap-3 rounded-lg border border-gray-100 bg-white/60 px-4 py-3 opacity-60">
+                <Circle className="h-5 w-5 text-gray-300 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-gray-500">Go Live</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    TunnelFlow provisions the tunnel ingress rule and Cloudflare DNS record — your service is publicly accessible with zero manual config.
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
 
+        {/* Tunnel exists but no servers */}
         {totalTunnels > 0 && totalServers === 0 && (
           <Card className="border-dashed">
             <CardContent className="py-10 text-center space-y-3">

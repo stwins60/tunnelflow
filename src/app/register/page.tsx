@@ -399,24 +399,64 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* ── Step 4: Complete ── */}
+          {/* ── Step 4: Complete / Getting Started ── */}
           {step === 4 && (
-            <div className="py-4 text-center space-y-5">
-              <div className="flex justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
-                  <CheckCircle2 className="h-9 w-9 text-green-500" />
+            <div className="py-2 space-y-6">
+              <div className="text-center space-y-2">
+                <div className="flex justify-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-50">
+                    <CheckCircle2 className="h-8 w-8 text-green-500" />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Account created!</h2>
-                <p className="mt-2 text-sm text-gray-500">
-                  Your TunnelFlow account is ready. Create your first tunnel to start routing traffic.
+                <h2 className="text-xl font-bold text-gray-900">You&apos;re all set!</h2>
+                <p className="text-sm text-gray-500">
+                  Your TunnelFlow account is ready. Here&apos;s how to get traffic flowing in 3 steps.
                 </p>
               </div>
-              <Button className="w-full" size="lg" onClick={() => router.push('/dashboard')}>
-                Go to dashboard
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
+
+              {/* Getting Started steps */}
+              <ol className="space-y-3">
+                {[
+                  {
+                    n: 1,
+                    title: 'Create a Tunnel',
+                    desc: 'A tunnel is a persistent connection between Cloudflare and your network. One tunnel can serve many services.',
+                    done: false,
+                  },
+                  {
+                    n: 2,
+                    title: 'Add a Server',
+                    desc: 'Map a public hostname (e.g. app.example.com) to an internal service running on a container or host.',
+                    done: false,
+                  },
+                  {
+                    n: 3,
+                    title: 'Go Live',
+                    desc: 'TunnelFlow automatically creates the DNS record and updates the tunnel ingress — no manual Cloudflare config needed.',
+                    done: false,
+                  },
+                ].map((s) => (
+                  <li key={s.n} className="flex gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white mt-0.5">
+                      {s.n}
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{s.title}</p>
+                      <p className="mt-0.5 text-xs text-gray-500">{s.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+
+              <div className="flex flex-col gap-2 pt-1">
+                <Button className="w-full" size="lg" onClick={() => router.push('/dashboard/tunnels')}>
+                  Create your first tunnel
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+                <Button variant="ghost" className="w-full text-gray-500" onClick={() => router.push('/dashboard')}>
+                  Go to dashboard
+                </Button>
+              </div>
             </div>
           )}
         </div>

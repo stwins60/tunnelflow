@@ -66,10 +66,10 @@ const createSchema = z.object({
     .string()
     .min(1, 'Upstream address is required')
     .regex(
-      /^(https?:\/\/.+|[a-zA-Z0-9][a-zA-Z0-9._-]*(:[0-9]{1,5})?(\/.*)?)$/,
+      /^([a-zA-Z][a-zA-Z0-9+\-.]*:\/\/.+|[a-zA-Z0-9][a-zA-Z0-9._-]*(:[0-9]{1,5})?(\/.*)?)$/,
       'Upstream must be a URL or a bare host/container name (e.g. tunnel-manager:3000)'
     ),
-  protocol: z.enum(['http', 'https']).default('http'),
+  protocol: z.enum(['http', 'https', 'tcp', 'ssh', 'rdp', 'smb']).default('http'),
   tunnelId: z.string().optional().nullable(),
   /** Cloudflare zone ID for this server's DNS record (auto-detected from subdomain if omitted) */
   zoneId: z.string().optional().nullable(),
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     const { name, subdomain, upstream, protocol, tunnelId, zoneId: bodyZoneId, notes, overwriteDns, skipProvision } = parsed.data
 
     // Normalise upstream: add protocol prefix if bare hostname/container name, then strip trailing slash
-    const normalizedUpstream = /^https?:\/\//i.test(upstream)
+    const normalizedUpstream = /^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\//i.test(upstream)
       ? upstream
       : `${protocol}://${upstream}`
     const cleanUpstream = normalizedUpstream.replace(/\/$/, '')

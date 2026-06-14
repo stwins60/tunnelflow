@@ -51,7 +51,7 @@ model Server {
   name        String
   subdomain   String   @unique  // full public hostname e.g. app1.example.com
   upstream    String            // http://localhost:8080
-  protocol    String   @default("http") // http | https
+  protocol    String   @default("http") // http | https | tcp | ssh | rdp | smb
   tunnelId    String?
   tunnel      Tunnel?  @relation(fields: [tunnelId], references: [id], onDelete: SetNull)
   dnsRecordId String?           // Cloudflare DNS record ID (for cleanup)
