@@ -6,6 +6,26 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 
 ---
 
+## [1.1.0] - 2026-06-14
+
+### Added
+- **Extended protocol support** — servers now support `tcp`, `ssh`, `rdp`, and `smb` in addition to `http`/`https`, matching all Cloudflare Tunnel ingress service types
+- **DNS record tracking & audit** — all Cloudflare DNS records managed by TunnelFlow are tracked in the local database with full create/update/delete audit history
+- **DNS records dashboard page** — new `/dashboard/dns-records` view with search, zone filtering, and per-record history
+- **DNS backfill API** (`POST /api/dns-records/backfill`) — retroactively import existing Cloudflare DNS records into the local audit store
+- **First-time user onboarding** — registration step 4 now shows a step-by-step getting-started guide; the dashboard shows an interactive onboarding checklist for new accounts with no tunnels or servers
+- **Auto health check on dashboard load** — the Healthy stat card is populated automatically on page load instead of requiring a manual button click; shows a loading indicator while the check is in flight
+
+### Changed
+- Protocol enum on `Server` expanded from `['http','https']` to `['http','https','tcp','ssh','rdp','smb']` in both API routes and the add-server form
+- Upstream URL validation regex broadened to accept any valid URI scheme (not just `http://`/`https://`)
+- Dashboard "No tunnels yet" empty state replaced with a richer onboarding guide card
+
+### Fixed
+- Dashboard Healthy card showed `—` for existing users until they manually ran a health check
+
+---
+
 ## [1.0.0] - 2026-06-09
 
 ### Added
