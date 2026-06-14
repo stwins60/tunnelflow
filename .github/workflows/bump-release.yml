@@ -1,0 +1,86 @@
+name: Bump & Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type"
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+concurrency:
+  group: bump-release
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    name: Bump version, tag, and push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version in package.json
+        id: bump
+        run: |
+          OLD=$(node -p "require('./package.json').version")
+          npm version ${{ inputs.bump }} --no-git-tag-version
+          NEW=$(node -p "require('./package.json').version")
+          echo "old=$OLD" >> "$GITHUB_OUTPUT"
+          echo "new=$NEW" >> "$GITHUB_OUTPUT"
+          echo "tag=v$NEW" >> "$GITHUB_OUTPUT"
+
+      - name: Update CHANGELOG.md
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          NEW_VERSION="${{ steps.bump.outputs.new }}"
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            COMMITS=$(git log "$LAST_TAG"..HEAD~1 --pretty=format:"- %s" --no-merges)
+          else
+            COMMITS="- See git log for full history"
+          fi
+
+          python3 - "$NEW_VERSION" "$DATE" "$COMMITS" <<'PYEOF'
+          import sys
+          new_ver, date, commits = sys.argv[1], sys.argv[2], sys.argv[3]
+          entry = f"## [{new_ver}] - {date}\n\n### Changed\n\n{commits}\n\n---\n"
+          with open("CHANGELOG.md", "r") as f:
+              content = f.read()
+          # Insert the new entry after the first '---' separator (the header divider)
+          updated = content.replace("\n---\n", f"\n---\n\n{entry}", 1)
+          with open("CHANGELOG.md", "w") as f:
+              f.write(updated)
+          PYEOF
+
+      - name: Commit bump
+        run: |
+          git add package.json CHANGELOG.md
+          git commit -m "chore: release ${{ steps.bump.outputs.tag }}"
+
+      - name: Create and push tag
+        run: |
+          git tag -a "${{ steps.bump.outputs.tag }}" -m "Release ${{ steps.bump.outputs.tag }}"
+          git push origin master --follow-tags
