@@ -12,12 +12,21 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { LayoutTemplate } from 'lucide-react'
 import { toast } from 'sonner'
 import { AppTunnel } from '@/types'
 
 interface CfZone {
   id: string
   name: string
+}
+
+interface ServerTemplate {
+  id: string
+  name: string
+  protocol: string
+  upstreamPattern: string | null
+  notes: string | null
 }
 
 interface AddServerFormProps {
@@ -29,6 +38,7 @@ export function AddServerForm({ defaultTunnelId, onSuccess }: AddServerFormProps
   const router = useRouter()
   const [tunnels, setTunnels] = useState<AppTunnel[]>([])
   const [zones, setZones] = useState<CfZone[]>([])
+  const [templates, setTemplates] = useState<ServerTemplate[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [conflictData, setConflictData] = useState<{
@@ -50,6 +60,10 @@ export function AddServerForm({ defaultTunnelId, onSuccess }: AddServerFormProps
     fetch('/api/tunnels')
       .then((r) => r.json())
       .then((d) => { if (d.ok) setTunnels(d.data.tunnels) })
+
+    fetch('/api/templates')
+      .then((r) => r.json())
+      .then((d) => { if (d.ok) setTemplates(d.data.templates) })
 
     fetch('/api/settings')
       .then((r) => r.json())
@@ -135,6 +149,37 @@ export function AddServerForm({ defaultTunnelId, onSuccess }: AddServerFormProps
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
+        )}
+
+        {/* Template picker */}
+        {templates.length > 0 && (
+          <div className="space-y-2">
+            <Label htmlFor="template" className="flex items-center gap-1.5">
+              <LayoutTemplate className="h-3.5 w-3.5 text-muted-foreground" />
+              Start from a template
+            </Label>
+            <Select
+              onValueChange={(id) => {
+                const t = templates.find((tmpl) => tmpl.id === id)
+                if (!t) return
+                set('protocol', t.protocol)
+                if (t.upstreamPattern) set('upstream', t.upstreamPattern)
+                if (t.notes) set('notes', t.notes)
+              }}
+            >
+              <SelectTrigger id="template">
+                <SelectValue placeholder="Select a template to pre-fill fields…" />
+              </SelectTrigger>
+              <SelectContent>
+                {templates.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Pre-fills protocol, upstream, and notes. You can still edit any field after.
+            </p>
+          </div>
         )}
 
         <div className="space-y-2">

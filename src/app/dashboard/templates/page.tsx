@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { LoadingPage } from '@/components/shared/loading-spinner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { LayoutTemplate, Plus, Trash2, Pencil } from 'lucide-react'
+import { LayoutTemplate, Plus, Trash2, Pencil, Info } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -111,6 +111,22 @@ export default function TemplatesPage() {
           <Button onClick={openCreate} className="gap-2">
             <Plus className="h-4 w-4" /> New Template
           </Button>
+        </div>
+
+        {/* Info banner */}
+        <div className="flex gap-3 rounded-lg border border-blue-100 bg-blue-50/60 px-4 py-3 text-sm text-blue-900">
+          <Info className="h-4 w-4 shrink-0 mt-0.5 text-blue-500" />
+          <div className="space-y-1">
+            <p className="font-medium">What are Route Templates?</p>
+            <p className="text-blue-800/80 leading-relaxed">
+              Templates are saved presets that pre-fill the <strong>protocol</strong>, <strong>upstream pattern</strong>, and notes when adding a new server route — saving you from re-typing common settings every time.
+            </p>
+            <ul className="list-disc list-inside text-blue-800/70 space-y-0.5 pt-0.5">
+              <li>Define a template once (e.g. <em>Internal HTTPS service</em>, <em>SSH jump host</em>)</li>
+              <li>Select it on the <strong>Add Server</strong> form to auto-fill fields</li>
+              <li>Templates are per-account and do not affect Cloudflare directly</li>
+            </ul>
+          </div>
         </div>
 
         {loading ? (
