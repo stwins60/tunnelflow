@@ -308,6 +308,32 @@ export async function syncWithCloudflare(userId?: string | null): Promise<{
           db.prepare('UPDATE "Server" SET "status" = \'error\', "updatedAt" = ? WHERE "id" = ?')
             .run(now(), server.id)
         }
+
+        // Track DNS record if server is active and not yet tracked
+        if (server.status === 'active' && server.dnsRecordId) {
+          const { zones } = await getCfCredentials(userId)
+          const resolvedZoneId = server.zoneId ?? getZoneForSubdomain(server.subdomain, zones)?.id ?? zones[0]?.id
+          const resolvedZoneName = zones.find((z) => z.id === resolvedZoneId)?.name ?? null
+          if (resolvedZoneId) {
+            const alreadyTracked = getDnsRecordByCfId(server.dnsRecordId, resolvedZoneId)
+            if (!alreadyTracked) {
+              try {
+                const cfRecord = await findDnsRecord(resolvedZoneId, server.subdomain, token)
+                if (cfRecord) {
+                  logDnsRecordCreated({
+                    cfRecord,
+                    zoneName: resolvedZoneName,
+                    zoneId: resolvedZoneId,
+                    serverId: server.id,
+                    userId,
+                  })
+                }
+              } catch {
+                // Non-fatal — skip tracking for this record
+              }
+            }
+          }
+        }
       }
     } catch {
       // Ignore config fetch errors during sync

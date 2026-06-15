@@ -12,6 +12,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import Link from 'next/link'
 import { LayoutTemplate } from 'lucide-react'
 import { toast } from 'sonner'
 import { AppTunnel } from '@/types'
@@ -152,35 +153,44 @@ export function AddServerForm({ defaultTunnelId, onSuccess }: AddServerFormProps
         )}
 
         {/* Template picker */}
-        {templates.length > 0 && (
-          <div className="space-y-2">
-            <Label htmlFor="template" className="flex items-center gap-1.5">
-              <LayoutTemplate className="h-3.5 w-3.5 text-muted-foreground" />
-              Start from a template
-            </Label>
-            <Select
-              onValueChange={(id) => {
-                const t = templates.find((tmpl) => tmpl.id === id)
-                if (!t) return
-                set('protocol', t.protocol)
-                if (t.upstreamPattern) set('upstream', t.upstreamPattern)
-                if (t.notes) set('notes', t.notes)
-              }}
-            >
-              <SelectTrigger id="template">
-                <SelectValue placeholder="Select a template to pre-fill fields…" />
-              </SelectTrigger>
-              <SelectContent>
-                {templates.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="space-y-2">
+          <Label htmlFor="template" className="flex items-center gap-1.5">
+            <LayoutTemplate className="h-3.5 w-3.5 text-muted-foreground" />
+            Start from a template
+          </Label>
+          {templates.length > 0 ? (
+            <>
+              <Select
+                onValueChange={(id) => {
+                  const t = templates.find((tmpl) => tmpl.id === id)
+                  if (!t) return
+                  set('protocol', t.protocol)
+                  if (t.upstreamPattern) set('upstream', t.upstreamPattern)
+                  if (t.notes) set('notes', t.notes)
+                }}
+              >
+                <SelectTrigger id="template">
+                  <SelectValue placeholder="Select a template to pre-fill fields…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Pre-fills protocol, upstream, and notes. You can still edit any field after.
+              </p>
+            </>
+          ) : (
             <p className="text-xs text-muted-foreground">
-              Pre-fills protocol, upstream, and notes. You can still edit any field after.
+              No templates yet.{' '}
+              <Link href="/dashboard/templates" className="text-primary underline-offset-2 hover:underline">
+                Create a template
+              </Link>{' '}to pre-fill protocol, upstream, and notes when adding servers.
             </p>
-          </div>
-        )}
+          )}
+        </div>
 
         <div className="space-y-2">
           <Label htmlFor="server-name">Server name *</Label>

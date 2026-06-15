@@ -198,9 +198,10 @@ export function getDnsRecords(filters?: {
   serverId?: string
   userId?: string
   limit?: number
+  offset?: number
 }): DbDnsRecord[] {
   try {
-    const { status = 'all', zoneId, serverId, userId, limit = 100 } = filters ?? {}
+    const { status = 'all', zoneId, serverId, userId, limit = 100, offset = 0 } = filters ?? {}
 
     let query = 'SELECT * FROM "DnsRecord" WHERE 1=1'
     const params: (string | number)[] = []
@@ -221,17 +222,39 @@ export function getDnsRecords(filters?: {
     }
 
     if (userId) {
-      query += ' AND "userId" = ?'
+      query += ' AND ("userId" = ? OR "userId" IS NULL)'
       params.push(userId)
     }
 
-    query += ' ORDER BY "createdAt" DESC LIMIT ?'
-    params.push(limit)
+    query += ' ORDER BY "createdAt" DESC LIMIT ? OFFSET ?'
+    params.push(limit, offset)
 
     return db.prepare(query).all(...params) as DbDnsRecord[]
   } catch (err) {
     console.error('[dns-audit] Error fetching DNS records:', err)
     return []
+  }
+}
+
+export function countDnsRecords(filters?: {
+  status?: 'active' | 'deleted' | 'all'
+  zoneId?: string
+  serverId?: string
+  userId?: string
+}): number {
+  try {
+    const { status = 'all', zoneId, serverId, userId } = filters ?? {}
+    let query = 'SELECT count(*) as n FROM "DnsRecord" WHERE 1=1'
+    const params: (string | number)[] = []
+
+    if (status !== 'all') { query += ' AND "status" = ?'; params.push(status) }
+    if (zoneId) { query += ' AND "zoneId" = ?'; params.push(zoneId) }
+    if (serverId) { query += ' AND "serverId" = ?'; params.push(serverId) }
+    if (userId) { query += ' AND ("userId" = ? OR "userId" IS NULL)'; params.push(userId) }
+
+    return (db.prepare(query).get(...params) as { n: number }).n
+  } catch {
+    return 0
   }
 }
 
@@ -250,6 +273,8 @@ export function getDnsRecordByCfId(cfRecordId: string, zoneId: string): DbDnsRec
 export function getDnsRecordsWithHistory(filters?: {
   status?: 'active' | 'deleted' | 'all'
   limit?: number
+  offset?: number
+  userId?: string
 }): Array<DbDnsRecord & { auditLogs: Array<{ action: string; createdAt: string; userEmail: string | null }> }> {
   try {
     const records = getDnsRecords(filters)

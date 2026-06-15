@@ -6,6 +6,7 @@
 
 import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/session'
+import { resolveWorkspaceId } from '@/lib/auth'
 import { ok, unauthorized, serverError } from '@/lib/api-helpers'
 import { backfillDnsRecords } from '@/lib/dns-backfill'
 
@@ -14,8 +15,9 @@ export async function POST(request: NextRequest) {
     const session = await requireAdmin().catch(() => null)
     if (!session) return unauthorized()
 
-    console.log('[backfill] Starting DNS record backfill...')
-    const results = backfillDnsRecords()
+    const wsId = resolveWorkspaceId(session.userId!)
+    console.log('[backfill] Starting DNS record backfill for workspace:', wsId)
+    const results = await backfillDnsRecords(wsId)
 
     return ok({
       message: 'Backfill complete',
