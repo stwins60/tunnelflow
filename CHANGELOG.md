@@ -6,6 +6,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 
 ---
 
+## [1.1.1] - 2026-06-15
+
+### Changed
+
+- feat: add template picker and info banner to enhance server route creation
+- ci: add automated bump-release workflow
+
+---
+
 ## [1.1.0] - 2026-06-14
 
 ### Added
