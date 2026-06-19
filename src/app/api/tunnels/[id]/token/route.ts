@@ -47,10 +47,10 @@ export async function GET(request: NextRequest, { params }: Params) {
       tunnelName: tunnel.name,
       token: tunnelToken, // Used by the UI for the install command display
       commands: {
-        docker: `docker run -d --name cloudflared-${tunnel.name} cloudflare/cloudflared:latest tunnel --no-autoupdate run --token ${tunnelToken}`,
-        systemd: `curl -L --output cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64\nchmod +x cloudflared\nsudo mv cloudflared /usr/local/bin/\nsudo cloudflared service install ${tunnelToken}`,
+        docker: `docker network create cloudflared-${tunnel.name} 2>/dev/null || true\ndocker run -d --name cloudflared-${tunnel.name} --network cloudflared-${tunnel.name} cloudflare/cloudflared:latest tunnel --no-autoupdate run --token ${tunnelToken}`,
+        systemd: `curl -L --output cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64\nchmod +x cloudflared\nsudo mv cloudflared /usr/local/bin/\nsudo tee /etc/systemd/system/cloudflared-${tunnel.name}.service > /dev/null <<'SERVICE'\n[Unit]\nDescription=cloudflared tunnel ${tunnel.name}\nAfter=network.target\n\n[Service]\nExecStart=/usr/local/bin/cloudflared tunnel --no-autoupdate run --token ${tunnelToken}\nRestart=on-failure\nRestartSec=5s\nUser=root\n\n[Install]\nWantedBy=multi-user.target\nSERVICE\nsudo systemctl daemon-reload\nsudo systemctl enable --now cloudflared-${tunnel.name}.service`,
         direct: `cloudflared tunnel run --token ${tunnelToken}`,
-        kubernetes: `kubectl create secret generic cloudflared-token --from-literal=token=${tunnelToken}\nkubectl create deployment cloudflared --image=cloudflare/cloudflared:latest -- tunnel --no-autoupdate run --token ${tunnelToken}`,
+        kubernetes: `kubectl create namespace cloudflared-${tunnel.name} 2>/dev/null || true\nkubectl create secret generic cloudflared-token --from-literal=token=${tunnelToken} -n cloudflared-${tunnel.name}\nkubectl create deployment cloudflared --image=cloudflare/cloudflared:latest -n cloudflared-${tunnel.name} -- tunnel --no-autoupdate run --token ${tunnelToken}`,
       },
     })
   } catch (e) {

@@ -6,6 +6,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 
 ---
 
+## [1.2.0] - 2026-06-18
+
+### Improved
+- **Docker install command** — automatically creates a dedicated Docker network (`cloudflared-<name>`) before running the container, isolating tunnel traffic
+- **systemd install command** — generates a complete, production-ready systemd unit file (`/etc/systemd/system/cloudflared-<name>.service`) with `Restart=on-failure` and `RestartSec=5s` instead of using the deprecated `cloudflared service install`
+- **Kubernetes install command** — scopes all resources to a dedicated namespace (`cloudflared-<name>`) to avoid collisions in shared clusters
+
+---
+
 ## [1.1.1] - 2026-06-15
 
 ### Changed
