@@ -3,8 +3,16 @@
 **Self-hosted Cloudflare Tunnel management platform** — provision routes, manage users, monitor health, and automate deployments from a clean SaaS-quality UI.
 
 [![CI](https://github.com/stwins60/tunnelflow/actions/workflows/ci.yml/badge.svg)](https://github.com/stwins60/tunnelflow/actions/workflows/ci.yml)
-[![Docker](https://github.com/stwins60/tunnelflow/actions/workflows/release.yml/badge.svg)](https://github.com/stwins60/tunnelflow/actions/workflows/release.yml)
+[![Release](https://github.com/stwins60/tunnelflow/actions/workflows/release.yml/badge.svg)](https://github.com/stwins60/tunnelflow/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/stwins60/tunnelflow?sort=semver&label=release)](https://github.com/stwins60/tunnelflow/releases/latest)
+[![GitHub Stars](https://img.shields.io/github/stars/stwins60/tunnelflow?style=flat)](https://github.com/stwins60/tunnelflow/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/stwins60/tunnelflow?style=flat)](https://github.com/stwins60/tunnelflow/forks)
+[![Issues](https://img.shields.io/github/issues/stwins60/tunnelflow)](https://github.com/stwins60/tunnelflow/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen?logo=node.js)](https://nodejs.org)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
 
 ---
 
