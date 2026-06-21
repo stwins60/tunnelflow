@@ -249,9 +249,16 @@ export function normalizeTunnelStatus(
   if (cfStatus === 'healthy') return 'active'
   if (cfStatus === 'degraded') return 'degraded'
   if (cfStatus === 'inactive') return 'inactive'
+  if (cfStatus === 'down') return 'degraded'
   if (cfStatus === 'error') return 'error'
 
   // Fallback: count connections (for older API responses that include them)
+  // Newer Cloudflare responses may omit per-connection `status`, but if there
+  // are live connection objects we still consider the tunnel active.
+  if ((tunnel.connections?.length ?? 0) > 0) {
+    return 'active'
+  }
+
   const activeConnections = tunnel.connections?.filter(
     (c) => c.status === 'connected' || c.status === 'active'
   ) ?? []

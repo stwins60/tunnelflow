@@ -75,7 +75,14 @@ export default function TunnelDetailPage() {
     </>
   )
 
-  const activeConnections = (tunnel.connections ?? []).filter((c: any) => c.status === 'connected')
+  const activeConnections = (tunnel.connections ?? []).filter((c: any) => {
+    const status = String(c?.status ?? '').toLowerCase()
+    if (status === 'connected' || status === 'active') return true
+    // Newer Cloudflare responses use is_pending_reconnect instead of status.
+    if (typeof c?.is_pending_reconnect === 'boolean') return c.is_pending_reconnect === false
+    // Fallback: if a connection object exists, treat it as active.
+    return true
+  })
 
   return (
     <>
@@ -148,10 +155,10 @@ export default function TunnelDetailPage() {
             ) : (
               <div className="space-y-2">
                 {activeConnections.map((c: any) => (
-                  <div key={c.id} className="flex items-center justify-between rounded border p-3 text-sm">
+                  <div key={c.id ?? c.uuid ?? c.client_id} className="flex items-center justify-between rounded border p-3 text-sm">
                     <div>
                       <p className="font-mono text-xs">{c.client_id}</p>
-                      <p className="text-xs text-muted-foreground">{c.location} · v{c.client_version}</p>
+                      <p className="text-xs text-muted-foreground">{c.location ?? c.colo_name ?? 'Unknown'} · v{c.client_version ?? 'unknown'}</p>
                     </div>
                     <span className="text-xs text-green-600">Connected</span>
                   </div>
