@@ -55,7 +55,7 @@ export function CopyCode({ code, label }: { code: string; label?: string }) {
         <div className="border-b px-3 py-1.5 text-xs font-medium text-muted-foreground">{label}</div>
       )}
       <div className="flex items-start gap-2 p-3">
-        <code className="flex-1 break-all font-mono text-xs">{code}</code>
+        <pre className="flex-1 overflow-x-auto whitespace-pre font-mono text-xs leading-5">{code}</pre>
         <CopyButton text={code} size="icon" />
       </div>
     </div>

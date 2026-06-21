@@ -6,6 +6,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and 
 
 ---
 
+## [2.0.0] - 2026-06-21
+
+### Changed
+- **Health monitoring behavior** — health checks now treat any HTTP response as reachable, with fallback from `HEAD` to `GET` for services that reject `HEAD`
+- **External reachability fallback** — when direct upstream checks fail (for example isolated Docker networks), health checks now probe the public server hostname to reduce false `Down` states
+- **Legacy server coverage** — health checks and per-server health API now include legacy records where `userId` is `NULL`
+- **Tunnel install UX** — install command dialogs now preserve line breaks and support both vertical and horizontal scrolling for long commands/tokens
+
+### Fixed
+- **Tunnel token response parsing** — tunnel token retrieval now supports both Cloudflare response shapes (raw string and object with `token` field)
+- **Setup validation** — setup now preflights Cloudflare permissions for tunnel management and DNS edits, returning explicit validation errors early
+- **Kubernetes install command** — deployment flow now reads token from Kubernetes secret instead of hardcoding token in deployment command args
+
+### Breaking
+- **Release major bump** — this release promotes behavior changes in health-state calculation and setup validation under semantic versioning `2.0.0`
+
+---
+
 ## [1.2.0] - 2026-06-18
 
 ### Improved

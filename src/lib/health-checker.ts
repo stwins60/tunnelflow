@@ -25,15 +25,27 @@ export async function checkUpstream(upstream: string): Promise<Omit<HealthResult
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
   try {
-    const res = await fetch(upstream, {
+    // Try HEAD first (cheap), then fall back to GET for services that reject HEAD.
+    let res = await fetch(upstream, {
       method: 'HEAD',
       signal: controller.signal,
       redirect: 'follow',
     })
+
+    if (res.status === 405 || res.status === 501) {
+      res = await fetch(upstream, {
+        method: 'GET',
+        signal: controller.signal,
+        redirect: 'follow',
+      })
+    }
+
     clearTimeout(timer)
     const responseMs = Date.now() - start
-    // Treat 2xx / 3xx as up; anything else (4xx, 5xx) still means the server responded
-    const status = res.status < 500 ? 'up' : 'down'
+
+    // Any HTTP response means the service is reachable through the network path.
+    // Reserve down/error for true network failures or timeouts.
+    const status = 'up'
     return { status, statusCode: res.status, responseMs, error: null }
   } catch (err: unknown) {
     clearTimeout(timer)
@@ -87,14 +99,31 @@ export function getHealthHistory(serverId: string, limit = 50): DbHealthCheck[] 
  */
 export async function runHealthChecks(workspaceOwnerId: string): Promise<HealthResult[]> {
   const servers = db
-    .prepare(`SELECT * FROM "Server" WHERE "userId" = ? AND "status" = 'active'`)
+    .prepare(`SELECT * FROM "Server" WHERE ("userId" = ? OR "userId" IS NULL) AND "status" = 'active'`)
     .all(workspaceOwnerId) as DbServer[]
 
   const results = await Promise.all(
     servers.map(async (server) => {
-      const result: HealthResult = {
+      let result: HealthResult = {
         serverId: server.id,
         ...(await checkUpstream(server.upstream)),
+      }
+
+      // If direct upstream is not reachable from TunnelFlow's runtime network,
+      // fall back to the public route check. This avoids false negatives when
+      // upstream hostnames are only resolvable inside another Docker network.
+      if (result.status !== 'up' && server.subdomain) {
+        try {
+          const publicResult = await checkUpstream(`https://${server.subdomain}`)
+          if (publicResult.status === 'up') {
+            result = {
+              serverId: server.id,
+              ...publicResult,
+            }
+          }
+        } catch {
+          // Keep original upstream failure result
+        }
       }
 
       const prev = getLatestHealthCheck(server.id)

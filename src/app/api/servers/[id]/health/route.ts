@@ -14,7 +14,7 @@ export async function GET(
     const wsId = resolveWorkspaceId(session.userId!)
 
     const server = db
-      .prepare('SELECT * FROM "Server" WHERE "id" = ? AND "userId" = ?')
+      .prepare('SELECT * FROM "Server" WHERE "id" = ? AND ("userId" = ? OR "userId" IS NULL)')
       .get(params.id, wsId) as DbServer | undefined
     if (!server) return notFound('Server')
 

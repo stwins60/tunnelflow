@@ -106,7 +106,10 @@ const ENCRYPTED_KEYS = new Set<string>([SETTING_KEYS.CF_API_TOKEN])
  * Falls back to the bare key for backward compatibility with self-hosted setups.
  */
 function scopedKey(key: SettingKey, userId?: string | null): string {
-  if (userId) return `u:${userId}:${key}`
+  if (userId) {
+    const workspaceId = resolveWorkspaceId(userId)
+    return `u:${workspaceId}:${key}`
+  }
   return key
 }
 
@@ -163,7 +166,8 @@ export async function getAllSettings(userId?: string | null): Promise<Record<str
   const result: Record<string, string | null> = {}
 
   if (userId) {
-    const prefix = `u:${userId}:`
+    const workspaceId = resolveWorkspaceId(userId)
+    const prefix = `u:${workspaceId}:`
 
     // 1. Load global/legacy settings first (lower priority)
     const globalRows = db

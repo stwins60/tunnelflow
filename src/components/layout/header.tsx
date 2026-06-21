@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { RefreshCw, CheckCircle2, AlertCircle, Clock } from 'lucide-react'
+import { RefreshCw, CheckCircle2, AlertCircle, Clock, Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
@@ -16,6 +16,7 @@ interface SyncState {
 export function Header({ title }: { title: string }) {
   const [syncState, setSyncState] = useState<SyncState | null>(null)
   const [syncing, setSyncing] = useState(false)
+  const [isDark, setIsDark] = useState(false)
 
   async function fetchSyncState() {
     try {
@@ -54,13 +55,29 @@ export function Header({ title }: { title: string }) {
     return () => clearInterval(interval)
   }, [])
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const dark = savedTheme ? savedTheme === 'dark' : prefersDark
+
+    setIsDark(dark)
+    document.documentElement.classList.toggle('dark', dark)
+  }, [])
+
+  function toggleTheme() {
+    const nextDark = !isDark
+    setIsDark(nextDark)
+    document.documentElement.classList.toggle('dark', nextDark)
+    localStorage.setItem('theme', nextDark ? 'dark' : 'light')
+  }
+
   const lastSync = syncState?.lastSyncAt
     ? formatDistanceToNow(new Date(syncState.lastSyncAt), { addSuffix: true })
     : null
 
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-white px-6">
-      <h1 className="text-base font-semibold text-gray-900">{title}</h1>
+    <header className="flex h-14 items-center justify-between border-b bg-background px-6">
+      <h1 className="text-base font-semibold text-foreground">{title}</h1>
 
       <div className="flex items-center gap-4">
         {/* Sync status indicator */}
@@ -70,7 +87,7 @@ export function Header({ title }: { title: string }) {
             Sync error
           </span>
         ) : lastSync ? (
-          <span className="flex items-center gap-1 text-xs text-gray-400">
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="h-3.5 w-3.5" />
             {lastSync}
           </span>
@@ -87,6 +104,17 @@ export function Header({ title }: { title: string }) {
             In sync
           </span>
         ) : null}
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
 
         <Button
           variant="outline"

@@ -210,7 +210,7 @@ export function TunnelCard({ tunnel, onDeleted, onUpdated }: TunnelCardProps) {
 
       {/* Token dialog */}
       <Dialog open={tokenDialogOpen} onOpenChange={setTokenDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Install cloudflared — {tunnel.name}</DialogTitle>
             <DialogDescription>
@@ -221,7 +221,7 @@ export function TunnelCard({ tunnel, onDeleted, onUpdated }: TunnelCardProps) {
           {loadingToken ? (
             <div className="py-8 text-center text-muted-foreground text-sm">Loading token…</div>
           ) : tokenData ? (
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[58vh] overflow-y-auto pr-1">
               <CopyCode label="Docker (recommended)" code={tokenData.commands.docker} />
               <CopyCode label="systemd (Linux service)" code={tokenData.commands.systemd} />
               <CopyCode label="Direct (foreground)" code={tokenData.commands.direct} />

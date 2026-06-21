@@ -120,7 +120,20 @@ export async function getTunnelToken(
   tunnelId: string,
   token?: string
 ): Promise<string> {
-  return cfGet<string>(`/accounts/${accountId}/cfd_tunnel/${tunnelId}/token`, token)
+  const result = await cfGet<string | { token?: string }>(
+    `/accounts/${accountId}/cfd_tunnel/${tunnelId}/token`,
+    token
+  )
+
+  if (typeof result === 'string') {
+    return result
+  }
+
+  if (result && typeof result === 'object' && typeof result.token === 'string') {
+    return result.token
+  }
+
+  throw new Error('Unexpected Cloudflare tunnel token response format.')
 }
 
 // ─── Tunnel Configuration (Ingress Rules) ────────────────────────────────────
