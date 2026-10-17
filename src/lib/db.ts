@@ -20,6 +20,10 @@ export interface DbUser {
   workspaceOwnerId: string | null
   /** userId who invited this user */
   invitedBy: string | null
+  /** Hex token for password reset (64 chars) */
+  resetToken: string | null
+  /** ISO timestamp when the reset token expires */
+  resetTokenExpiry: string | null
   createdAt: string
   updatedAt: string
 }
@@ -488,6 +492,10 @@ function migrateSchema(instance: Database.Database): void {
   // v5: add before/after diff columns to AuditLog
   try { instance.exec(`ALTER TABLE "AuditLog" ADD COLUMN "before" TEXT`) } catch { /* exists */ }
   try { instance.exec(`ALTER TABLE "AuditLog" ADD COLUMN "after" TEXT`) }  catch { /* exists */ }
+
+  // v6: password reset token columns on User
+  try { instance.exec(`ALTER TABLE "User" ADD COLUMN "resetToken" TEXT`) }        catch { /* exists */ }
+  try { instance.exec(`ALTER TABLE "User" ADD COLUMN "resetTokenExpiry" TEXT`) }   catch { /* exists */ }
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

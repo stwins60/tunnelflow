@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import {
   Users, UserPlus, Trash2, Shield, Eye, Edit3,
   Copy, Check, Loader2, ChevronDown, ChevronUp,
-  Plus, X, Mail
+  Plus, X, Mail, KeyRound, EyeOff
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -227,6 +227,93 @@ function CreateGroupModal({ onClose, onCreated }: { onClose: () => void; onCreat
   )
 }
 
+// ─── Reset password modal ──────────────────────────────────────────────────────
+
+function ResetPasswordModal({ user, onClose }: { user: User; onClose: () => void }) {
+  const [password, setPassword]     = useState('')
+  const [confirm, setConfirm]       = useState('')
+  const [showPw, setShowPw]         = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [saving, setSaving]         = useState(false)
+
+  async function save() {
+    if (password.length < 8) { toast.error('Password must be at least 8 characters'); return }
+    if (password !== confirm)  { toast.error('Passwords do not match'); return }
+    setSaving(true)
+    try {
+      const res  = await fetch(`/api/users/${user.id}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Failed to reset password')
+      toast.success(`Password reset for ${user.email}`)
+      onClose()
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+        <div className="p-6 border-b flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Reset password</h2>
+            <p className="text-sm text-gray-500 mt-0.5 truncate">{user.email}</p>
+          </div>
+          <button onClick={onClose}><X className="w-5 h-5 text-gray-400 hover:text-gray-600" /></button>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">New password</label>
+            <div className="relative">
+              <input
+                type={showPw ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="At least 8 characters"
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button type="button" onClick={() => setShowPw(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm new password</label>
+            <div className="relative">
+              <input
+                type={showConfirm ? 'text' : 'password'}
+                value={confirm}
+                onChange={e => setConfirm(e.target.value)}
+                placeholder="Repeat new password"
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button type="button" onClick={() => setShowConfirm(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Cancel</button>
+            <button onClick={save} disabled={saving}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
+              Set password
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 type Tab = 'members' | 'groups' | 'invitations'
@@ -239,6 +326,7 @@ export default function UsersPage() {
   const [loading, setLoading]       = useState(true)
   const [showInvite, setShowInvite] = useState(false)
   const [showGroup, setShowGroup]   = useState(false)
+  const [resetTarget, setResetTarget] = useState<User | null>(null)
 
   async function loadAll() {
     setLoading(true)
@@ -366,9 +454,14 @@ export default function UsersPage() {
                   )}
                   <AccessBadge level={u.accessLevel} />
                   {u.workspaceOwnerId !== null && (
-                    <button onClick={() => removeUser(u.id, u.email)} className="p-1.5 text-gray-300 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <>
+                      <button onClick={() => setResetTarget(u)} className="p-1.5 text-gray-300 hover:text-blue-500 rounded-lg hover:bg-blue-50 transition-colors" title="Reset password">
+                        <KeyRound className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => removeUser(u.id, u.email)} className="p-1.5 text-gray-300 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors" title="Remove user">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </>
                   )}
                 </div>
               ))}
@@ -426,6 +519,7 @@ export default function UsersPage() {
 
       {showInvite && <InviteModal groups={groups} onClose={() => setShowInvite(false)} onCreated={loadAll} />}
       {showGroup  && <CreateGroupModal onClose={() => setShowGroup(false)} onCreated={loadAll} />}
+      {resetTarget && <ResetPasswordModal user={resetTarget} onClose={() => setResetTarget(null)} />}
     </div>
   )
 }

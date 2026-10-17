@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "tunnelflow": {
+      "command": "node",
+      "args": ["${workspaceFolder}/mcp/index.js"],
+      "env": {
+        "DATABASE_URL": "file:${workspaceFolder}/data/tunnel-manager.db"
+      }
+    }
+  }
+}

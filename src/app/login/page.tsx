@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CloudLightning, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -68,7 +68,12 @@ function LoginForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="password">Password</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <Link href="/forgot-password" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+              Forgot password?
+            </Link>
+          </div>
           <div className="relative">
             <Input
               id="password"
@@ -106,9 +111,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center space-y-3">
           <Link href="/" className="inline-flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600">
-              <CloudLightning className="h-5 w-5 text-white" />
-            </div>
+            <img src="/logo.png" className="h-9 w-9 rounded-xl object-cover" alt="TunnelFlow Logo" />
             <span className="text-xl font-bold text-gray-900">TunnelFlow</span>
           </Link>
           <div>

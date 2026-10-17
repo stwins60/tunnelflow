@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CloudLightning, ChevronRight, CheckCircle2, Loader2, Eye, EyeOff, ArrowLeft, ExternalLink } from 'lucide-react'
+import { ChevronRight, CheckCircle2, Loader2, Eye, EyeOff, ArrowLeft, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -100,9 +100,7 @@ export default function SetupPage() {
 
         <div className="text-center space-y-2">
           <Link href="/dashboard" className="inline-flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600">
-              <CloudLightning className="h-5 w-5 text-white" />
-            </div>
+            <img src="/logo.png" className="h-9 w-9 rounded-xl object-cover" alt="TunnelFlow Logo" />
             <span className="text-xl font-bold text-gray-900">TunnelFlow</span>
           </Link>
           <div>

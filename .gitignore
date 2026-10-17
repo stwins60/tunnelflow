@@ -14,3 +14,4 @@ yarn-error.log*
 .dockerignore
 MEDIUM_ARTICLE.md
 SOCIAL_MEDIA_POSTS.md
+*.tsbuildinfo

@@ -13,9 +13,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/session'
 
 // Public routes that don't require a session
-const ALWAYS_PUBLIC_PAGES = new Set(['/', '/login', '/register', '/invite'])
+const ALWAYS_PUBLIC_PAGES = new Set(['/', '/login', '/register', '/invite', '/forgot-password', '/reset-password'])
 const ALWAYS_PUBLIC_API = ['/api/setup', '/api/auth/', '/api/health', '/api/zones', '/api/invite']
-const AUTH_API_PATHS = ['/api/auth/login', '/api/auth/register', '/api/setup']
+const AUTH_API_PATHS = ['/api/auth/login', '/api/auth/register', '/api/auth/forgot-password', '/api/auth/reset-password', '/api/setup']
 
 // Pages that require authentication
 const PROTECTED_PREFIXES = ['/dashboard', '/setup']
@@ -152,7 +152,7 @@ export async function middleware(request: NextRequest) {
   const isLoggedIn = session.isLoggedIn === true
 
   // Redirect authenticated users away from auth pages
-  if (isLoggedIn && (pathname === '/login' || pathname === '/register' || pathname === '/invite')) {
+  if (isLoggedIn && (pathname === '/login' || pathname === '/register' || pathname === '/invite' || pathname === '/forgot-password' || pathname === '/reset-password')) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 

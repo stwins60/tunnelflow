@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  CloudLightning,
   ChevronRight,
   CheckCircle2,
   Circle,
@@ -120,9 +119,7 @@ export default function RegisterPage() {
         {/* Header */}
         <div className="text-center space-y-3">
           <Link href="/" className="inline-flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600">
-              <CloudLightning className="h-5 w-5 text-white" />
-            </div>
+            <img src="/logo.png" className="h-9 w-9 rounded-xl object-cover" alt="TunnelFlow Logo" />
             <span className="text-xl font-bold text-gray-900">TunnelFlow</span>
           </Link>
           <div>

@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import {
-  CloudLightning,
   Network,
   Server,
   Shield,
@@ -21,9 +20,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-              <CloudLightning className="h-4.5 w-4.5 text-white" style={{ height: '18px', width: '18px' }} />
-            </div>
+            <img src="/logo.png" className="h-8 w-8 rounded-lg object-cover" alt="TunnelFlow Logo" />
             <span className="text-lg font-bold tracking-tight">TunnelFlow</span>
           </div>
 
@@ -364,9 +361,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-600">
-                <CloudLightning className="h-4 w-4 text-white" />
-              </div>
+              <img src="/logo.png" className="h-7 w-7 rounded-md object-cover" alt="TunnelFlow Logo" />
               <span className="font-semibold text-gray-900">TunnelFlow</span>
             </div>
             <p className="text-sm text-gray-400">

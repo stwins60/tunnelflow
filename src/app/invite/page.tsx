@@ -3,7 +3,7 @@
 import { Suspense } from 'react'
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { CloudLightning, Loader2, CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react'
+import { Loader2, CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 
 type State = 'loading' | 'valid' | 'invalid' | 'submitting' | 'done'
@@ -78,9 +78,7 @@ function InviteInner() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600">
-            <CloudLightning className="h-5 w-5 text-white" />
-          </div>
+          <img src="/logo.png" className="h-9 w-9 rounded-xl object-cover" alt="TunnelFlow Logo" />
           <span className="text-xl font-bold text-gray-900">TunnelFlow</span>
         </div>
 

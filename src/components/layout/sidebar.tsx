@@ -8,7 +8,6 @@ import {
   Server,
   Settings,
   LogOut,
-  CloudLightning,
   ScrollText,
   Bell,
   Users,
@@ -16,6 +15,7 @@ import {
   Key,
   LayoutTemplate,
   Globe,
+  Bot,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -42,6 +42,7 @@ export function Sidebar() {
 
   const navItems = [
     { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, adminOnly: false },
+    { href: '/dashboard/ai-agent', label: 'AI Agent', icon: Bot, adminOnly: false },
     { href: '/dashboard/tunnels', label: 'Tunnels', icon: Network, adminOnly: false },
     { href: '/dashboard/servers', label: 'Servers', icon: Server, adminOnly: false },
     { href: '/dashboard/dns-records', label: 'DNS Records', icon: Globe, adminOnly: false },
@@ -63,9 +64,7 @@ export function Sidebar() {
     <aside className="flex h-screen w-60 flex-col border-r bg-gray-950">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2.5 border-b border-gray-800 px-4">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600">
-          <CloudLightning className="h-4 w-4 text-white" />
-        </div>
+        <img src="/logo.png" className="h-7 w-7 rounded-lg object-cover" alt="TunnelFlow Logo" />
         <span className="font-semibold text-sm text-white">TunnelFlow</span>
       </div>
 

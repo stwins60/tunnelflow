@@ -16,6 +16,21 @@ services:
       SYNC_INTERVAL_MS: ${SYNC_INTERVAL_MS:-60000}
       CF_MAX_RETRIES: ${CF_MAX_RETRIES:-3}
       CF_RETRY_BASE_DELAY_MS: ${CF_RETRY_BASE_DELAY_MS:-500}
+      # Optional: set these to enable password-reset emails
+      APP_URL: ${APP_URL:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      # Optional: AI Agent provider configuration
+      AI_PROVIDER: ${AI_PROVIDER:-auto}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID:-}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:-}
     volumes:
       - tunnel-data:/data
     healthcheck:
