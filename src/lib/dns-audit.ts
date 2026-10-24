@@ -193,25 +193,32 @@ export function logDnsRecordDeleted(params: {
  * Get all DNS records, optionally filtered by status.
  */
 export function getDnsRecords(filters?: {
-  status?: 'active' | 'deleted' | 'all'
+  status?: 'active' | 'deleted' | 'proxied' | 'all'
   zoneId?: string
   serverId?: string
   userId?: string
+  search?: string
   limit?: number
   offset?: number
 }): DbDnsRecord[] {
   try {
-    const { status = 'all', zoneId, serverId, userId, limit = 100, offset = 0 } = filters ?? {}
+    const { status = 'all', zoneId, serverId, userId, search, limit = 100, offset = 0 } = filters ?? {}
 
     let query = 'SELECT * FROM "DnsRecord" WHERE 1=1'
     const params: (string | number)[] = []
 
-    if (status !== 'all') {
+    if (status === 'active') {
       query += ' AND "status" = ?'
-      params.push(status)
+      params.push('active')
+    } else if (status === 'deleted') {
+      query += ' AND "status" = ?'
+      params.push('deleted')
+    } else if (status === 'proxied') {
+      query += ' AND "status" = ? AND "proxied" = 1'
+      params.push('active')
     }
 
-    if (zoneId) {
+    if (zoneId && zoneId !== 'all') {
       query += ' AND "zoneId" = ?'
       params.push(zoneId)
     }
@@ -226,6 +233,12 @@ export function getDnsRecords(filters?: {
       params.push(userId)
     }
 
+    if (search && search.trim()) {
+      const term = `%${search.trim().toLowerCase()}%`
+      query += ' AND (LOWER("name") LIKE ? OR LOWER("content") LIKE ? OR LOWER(COALESCE("zoneName", \'\')) LIKE ?)'
+      params.push(term, term, term)
+    }
+
     query += ' ORDER BY "createdAt" DESC LIMIT ? OFFSET ?'
     params.push(limit, offset)
 
@@ -237,24 +250,86 @@ export function getDnsRecords(filters?: {
 }
 
 export function countDnsRecords(filters?: {
-  status?: 'active' | 'deleted' | 'all'
+  status?: 'active' | 'deleted' | 'proxied' | 'all'
   zoneId?: string
   serverId?: string
   userId?: string
+  search?: string
 }): number {
   try {
-    const { status = 'all', zoneId, serverId, userId } = filters ?? {}
+    const { status = 'all', zoneId, serverId, userId, search } = filters ?? {}
     let query = 'SELECT count(*) as n FROM "DnsRecord" WHERE 1=1'
     const params: (string | number)[] = []
 
-    if (status !== 'all') { query += ' AND "status" = ?'; params.push(status) }
-    if (zoneId) { query += ' AND "zoneId" = ?'; params.push(zoneId) }
-    if (serverId) { query += ' AND "serverId" = ?'; params.push(serverId) }
-    if (userId) { query += ' AND ("userId" = ? OR "userId" IS NULL)'; params.push(userId) }
+    if (status === 'active') {
+      query += ' AND "status" = ?'
+      params.push('active')
+    } else if (status === 'deleted') {
+      query += ' AND "status" = ?'
+      params.push('deleted')
+    } else if (status === 'proxied') {
+      query += ' AND "status" = ? AND "proxied" = 1'
+      params.push('active')
+    }
+
+    if (zoneId && zoneId !== 'all') {
+      query += ' AND "zoneId" = ?'
+      params.push(zoneId)
+    }
+
+    if (serverId) {
+      query += ' AND "serverId" = ?'
+      params.push(serverId)
+    }
+
+    if (userId) {
+      query += ' AND ("userId" = ? OR "userId" IS NULL)'
+      params.push(userId)
+    }
+
+    if (search && search.trim()) {
+      const term = `%${search.trim().toLowerCase()}%`
+      query += ' AND (LOWER("name") LIKE ? OR LOWER("content") LIKE ? OR LOWER(COALESCE("zoneName", \'\')) LIKE ?)'
+      params.push(term, term, term)
+    }
 
     return (db.prepare(query).get(...params) as { n: number }).n
   } catch {
     return 0
+  }
+}
+
+/**
+ * Get aggregate statistics across DNS records.
+ */
+export function getDnsStats(userId?: string): {
+  total: number
+  active: number
+  deleted: number
+  proxied: number
+  zones: Array<{ zoneId: string; zoneName: string | null; count: number }>
+} {
+  try {
+    const userClause = userId ? 'WHERE ("userId" = ? OR "userId" IS NULL)' : ''
+    const userParams = userId ? [userId] : []
+
+    const total = (db.prepare(`SELECT count(*) as n FROM "DnsRecord" ${userClause}`).get(...userParams) as { n: number })?.n ?? 0
+    const active = (db.prepare(`SELECT count(*) as n FROM "DnsRecord" ${userClause ? userClause + ' AND' : 'WHERE'} "status" = 'active'`).get(...userParams) as { n: number })?.n ?? 0
+    const deleted = (db.prepare(`SELECT count(*) as n FROM "DnsRecord" ${userClause ? userClause + ' AND' : 'WHERE'} "status" = 'deleted'`).get(...userParams) as { n: number })?.n ?? 0
+    const proxied = (db.prepare(`SELECT count(*) as n FROM "DnsRecord" ${userClause ? userClause + ' AND' : 'WHERE'} "status" = 'active' AND "proxied" = 1`).get(...userParams) as { n: number })?.n ?? 0
+
+    const zones = db.prepare(`
+      SELECT "zoneId", "zoneName", count(*) as count
+      FROM "DnsRecord"
+      ${userClause ? userClause + ' AND' : 'WHERE'} "status" = 'active'
+      GROUP BY "zoneId", "zoneName"
+      ORDER BY count DESC
+    `).all(...userParams) as Array<{ zoneId: string; zoneName: string | null; count: number }>
+
+    return { total, active, deleted, proxied, zones }
+  } catch (err) {
+    console.error('[dns-audit] Error getting DNS stats:', err)
+    return { total: 0, active: 0, deleted: 0, proxied: 0, zones: [] }
   }
 }
 
@@ -271,7 +346,10 @@ export function getDnsRecordByCfId(cfRecordId: string, zoneId: string): DbDnsRec
  * Get DNS records with audit history.
  */
 export function getDnsRecordsWithHistory(filters?: {
-  status?: 'active' | 'deleted' | 'all'
+  status?: 'active' | 'deleted' | 'proxied' | 'all'
+  zoneId?: string
+  serverId?: string
+  search?: string
   limit?: number
   offset?: number
   userId?: string
