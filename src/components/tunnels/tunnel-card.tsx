@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { TunnelStatusBadge } from '@/components/shared/status-badge'
 import { CopyCode } from '@/components/shared/copy-button'
+import { InstallTunnelDialog } from '@/components/tunnels/install-tunnel-dialog'
 import { toast } from 'sonner'
 import { AppTunnel } from '@/types'
 import { formatDistanceToNow } from 'date-fns'
@@ -208,35 +209,14 @@ export function TunnelCard({ tunnel, onDeleted, onUpdated }: TunnelCardProps) {
         </CardContent>
       </Card>
 
-      {/* Token dialog */}
-      <Dialog open={tokenDialogOpen} onOpenChange={setTokenDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>Install cloudflared — {tunnel.name}</DialogTitle>
-            <DialogDescription>
-              Run one of these commands on the target server to connect it to this tunnel.
-              Keep the token secret — it grants full tunnel access.
-            </DialogDescription>
-          </DialogHeader>
-          {loadingToken ? (
-            <div className="py-8 text-center text-muted-foreground text-sm">Loading token…</div>
-          ) : tokenData ? (
-            <div className="space-y-4 max-h-[58vh] overflow-y-auto pr-1">
-              <CopyCode label="Docker (recommended)" code={tokenData.commands.docker} />
-              <CopyCode label="systemd (Linux service)" code={tokenData.commands.systemd} />
-              <CopyCode label="Direct (foreground)" code={tokenData.commands.direct} />
-              <CopyCode label="Kubernetes" code={tokenData.commands.kubernetes} />
-              <p className="text-xs text-muted-foreground">
-                After running the install command, the tunnel status will change to Active within a
-                few seconds. Click Sync to refresh.
-              </p>
-            </div>
-          ) : null}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setTokenDialogOpen(false)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Token dialog with tab for each command */}
+      <InstallTunnelDialog
+        tunnelName={tunnel.name}
+        open={tokenDialogOpen}
+        onOpenChange={setTokenDialogOpen}
+        tokenData={tokenData as any}
+        loading={loadingToken}
+      />
     </>
   )
 }

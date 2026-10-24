@@ -11,6 +11,10 @@ import {
   RefreshCw,
   Lock,
   BarChart3,
+  Bot,
+  Sparkles,
+  Cpu,
+  Terminal,
 } from 'lucide-react'
 
 export default function LandingPage() {
@@ -27,6 +31,10 @@ export default function LandingPage() {
           <nav className="hidden items-center gap-8 text-sm font-medium text-gray-600 md:flex">
             <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
             <a href="#how-it-works" className="hover:text-gray-900 transition-colors">How it works</a>
+            <a href="#mcp" className="hover:text-gray-900 transition-colors flex items-center gap-1.5 font-semibold text-purple-700">
+              <Bot className="h-3.5 w-3.5" />
+              MCP &amp; AI
+            </a>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -55,9 +63,15 @@ export default function LandingPage() {
         </div>
 
         <div className="mx-auto max-w-6xl px-6 text-center">
-          <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-semibold text-blue-700">
-            <Zap className="h-3 w-3" />
-            Powered by Cloudflare Tunnels
+          <div className="mx-auto mb-6 flex flex-wrap items-center justify-center gap-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-semibold text-blue-700">
+              <Zap className="h-3 w-3" />
+              Powered by Cloudflare Tunnels
+            </div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-4 py-1.5 text-xs font-semibold text-purple-700">
+              <Bot className="h-3 w-3" />
+              Model Context Protocol (MCP) Ready
+            </div>
           </div>
 
           <h1 className="mx-auto max-w-4xl text-5xl font-extrabold leading-tight tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
@@ -68,8 +82,8 @@ export default function LandingPage() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-500 leading-relaxed">
-            TunnelFlow lets you securely route public hostnames to your private services through Cloudflare Tunnels —
-            with a clean dashboard, instant DNS provisioning, and drift detection.
+            TunnelFlow lets you securely route public hostnames to private services through Cloudflare Tunnels —
+            with instant DNS provisioning, drift detection, and native Model Context Protocol (MCP) integration for AI agents.
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -198,6 +212,12 @@ export default function LandingPage() {
                 description: 'Manage multiple Cloudflare zones and automatically route subdomains to the correct zone.',
                 color: 'text-rose-600 bg-rose-50',
               },
+              {
+                icon: Bot,
+                title: 'Model Context Protocol (MCP)',
+                description: 'Native MCP server and HTTP JSON-RPC 2.0 endpoint. Connect Claude Code, Cursor, and AI agents to inspect and manage tunnels autonomously.',
+                color: 'text-purple-600 bg-purple-50',
+              },
             ].map(({ icon: Icon, title, description, color }) => (
               <div key={title} className="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div className={`mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl ${color}`}>
@@ -207,6 +227,81 @@ export default function LandingPage() {
                 <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── MCP & AI Agent Section ── */}
+      <section id="mcp" className="bg-slate-950 text-white py-24 relative overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.25),rgba(255,255,255,0))]" />
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-1.5 text-xs font-semibold text-purple-300 mb-6">
+                <Sparkles className="h-3.5 w-3.5" />
+                AI Agent &amp; Model Context Protocol
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">
+                Operate your infrastructure with{' '}
+                <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
+                  Claude Code, Cursor &amp; AI Agents
+                </span>
+              </h2>
+              <p className="mt-4 text-base text-slate-300 leading-relaxed">
+                TunnelFlow natively implements the Model Context Protocol (MCP). Connect your favorite AI developer assistants to query live status, diagnose server outages, run health checks, and automate tunnel provisioning through conversational prompts.
+              </p>
+
+              <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                  <div className="text-2xl font-bold text-purple-400">22+</div>
+                  <div className="text-xs text-slate-400 mt-1">Autonomous MCP Tools</div>
+                </div>
+                <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                  <div className="text-2xl font-bold text-indigo-400">7</div>
+                  <div className="text-xs text-slate-400 mt-1">Live Context Resources</div>
+                </div>
+                <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                  <div className="text-2xl font-bold text-pink-400">Dual</div>
+                  <div className="text-xs text-slate-400 mt-1">Stdio &amp; HTTP JSON-RPC</div>
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-2">
+                {['Claude Code', 'Cursor', 'Windsurf', 'Claude Desktop', 'Autonomous CLI Agent'].map((tag) => (
+                  <span key={tag} className="rounded-md border border-slate-800 bg-slate-900/80 px-3 py-1.5 text-xs text-slate-300 font-medium">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Code / Config Box */}
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/90 shadow-2xl p-6 font-mono text-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+                <span className="text-slate-400 flex items-center gap-2">
+                  <Terminal className="h-4 w-4 text-purple-400" />
+                  claude_desktop_config.json / mcp.json
+                </span>
+                <span className="text-[10px] text-purple-400 uppercase font-semibold">MCP Config</span>
+              </div>
+              <pre className="text-slate-300 overflow-x-auto leading-relaxed">
+{`{
+  "mcpServers": {
+    "tunnelflow": {
+      "command": "node",
+      "args": ["/app/mcp/index.js"],
+      "env": {
+        "DATABASE_URL": "file:/data/tunnel-manager.db"
+      }
+    }
+  }
+}`}
+              </pre>
+              <div className="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-center justify-between">
+                <span>Or connect via HTTP: <code className="text-purple-300">https://your-host/api/mcp</code></span>
+                <span className="text-green-400 font-medium">JSON-RPC 2.0</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -278,6 +373,8 @@ export default function LandingPage() {
                   'Full audit log with IP tracking',
                   'Role-based access control (Admin / Viewer)',
                   'Real-time sync status in the dashboard',
+                  'Model Context Protocol (MCP) server & HTTP JSON-RPC 2.0',
+                  'AI Agent integration for automated diagnostics & repairs',
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-green-500" />

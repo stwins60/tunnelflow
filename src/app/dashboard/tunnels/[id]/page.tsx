@@ -3,12 +3,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Network, Terminal, RefreshCw, Globe } from 'lucide-react'
+import { ArrowLeft, Network, Terminal, RefreshCw, Globe, Pencil } from 'lucide-react'
 import { Header } from '@/components/layout/header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { TunnelStatusBadge, ServerStatusBadge } from '@/components/shared/status-badge'
 import { CopyCode } from '@/components/shared/copy-button'
+import { InstallTunnelDialog } from '@/components/tunnels/install-tunnel-dialog'
 import { LoadingPage } from '@/components/shared/loading-spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
@@ -201,7 +202,14 @@ export default function TunnelDetailPage() {
                         {server.subdomain} → {server.upstream}
                       </p>
                     </div>
-                    <ServerStatusBadge status={server.status} />
+                    <div className="flex items-center gap-2">
+                      <ServerStatusBadge status={server.status} />
+                      <Button variant="ghost" size="icon" className="h-7 w-7" asChild title="Edit server">
+                        <Link href={`/dashboard/servers/${server.id}/edit`}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -210,30 +218,14 @@ export default function TunnelDetailPage() {
         </Card>
       </div>
 
-      {/* Token dialog */}
-      <Dialog open={tokenDialogOpen} onOpenChange={setTokenDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>Install cloudflared — {tunnel.name}</DialogTitle>
-            <DialogDescription>
-              Run one of these on the target server. The token grants full tunnel access — keep it secret.
-            </DialogDescription>
-          </DialogHeader>
-          {loadingToken ? (
-            <div className="py-8 text-center text-muted-foreground">Loading…</div>
-          ) : tokenData ? (
-            <div className="space-y-4 max-h-[58vh] overflow-y-auto pr-1">
-              <CopyCode label="Docker (recommended)" code={tokenData.commands.docker} />
-              <CopyCode label="systemd (Linux service)" code={tokenData.commands.systemd} />
-              <CopyCode label="Direct run" code={tokenData.commands.direct} />
-              <CopyCode label="Kubernetes" code={tokenData.commands.kubernetes} />
-            </div>
-          ) : null}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setTokenDialogOpen(false)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Token dialog with tab for each command */}
+      <InstallTunnelDialog
+        tunnelName={tunnel.name}
+        open={tokenDialogOpen}
+        onOpenChange={setTokenDialogOpen}
+        tokenData={tokenData}
+        loading={loadingToken}
+      />
     </>
   )
 }

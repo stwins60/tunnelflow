@@ -191,6 +191,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
             type: "string",
             description: "Updated server name",
           },
+          subdomain: {
+            type: "string",
+            description: "Updated subdomain / public hostname",
+          },
           upstream: {
             type: "string",
             description: "Updated upstream target",
@@ -656,6 +660,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         const ts = nowIso();
         const nameVal = args.name ?? existing.name;
+        const subdomainVal = args.subdomain ?? existing.subdomain;
         const upstreamVal = args.upstream ?? existing.upstream;
         const protocolVal = args.protocol ?? existing.protocol;
         const tunnelIdVal = args.tunnelId !== undefined ? args.tunnelId : existing.tunnelId;
@@ -665,10 +670,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         db.prepare(
           `
           UPDATE "Server"
-          SET "name" = ?, "upstream" = ?, "protocol" = ?, "tunnelId" = ?, "status" = ?, "notes" = ?, "updatedAt" = ?
+          SET "name" = ?, "subdomain" = ?, "upstream" = ?, "protocol" = ?, "tunnelId" = ?, "status" = ?, "notes" = ?, "updatedAt" = ?
           WHERE id = ?
         `
-        ).run(nameVal, upstreamVal, protocolVal, tunnelIdVal, statusVal, notesVal, ts, args.server_id);
+        ).run(nameVal, subdomainVal, upstreamVal, protocolVal, tunnelIdVal, statusVal, notesVal, ts, args.server_id);
 
         try {
           db.prepare(

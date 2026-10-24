@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Globe, Trash2, RefreshCw, ExternalLink, Activity, Wrench } from 'lucide-react'
+import { Globe, Trash2, RefreshCw, ExternalLink, Activity, Wrench, Pencil } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,6 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { ServerStatusBadge } from '@/components/shared/status-badge'
+import { EditServerDialog } from '@/components/servers/edit-server-dialog'
 import { toast } from 'sonner'
 import { AppServer } from '@/types'
 import { formatDistanceToNow } from 'date-fns'
@@ -29,6 +30,7 @@ interface ServerCardProps {
 export function ServerCard({ server, onDeleted, onUpdated }: ServerCardProps) {
   const router = useRouter()
   const [provisioning, setProvisioning] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const [healthData, setHealthData] = useState<HealthData | null>(null)
 
   useEffect(() => {
@@ -79,8 +81,9 @@ export function ServerCard({ server, onDeleted, onUpdated }: ServerCardProps) {
     : null
 
   return (
-    <Card className="transition-shadow hover:shadow-md">
-      <CardHeader className="pb-2">
+    <>
+      <Card className="transition-shadow hover:shadow-md">
+        <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <Globe className="h-4 w-4 shrink-0 text-primary" />
@@ -105,6 +108,15 @@ export function ServerCard({ server, onDeleted, onUpdated }: ServerCardProps) {
                 <RefreshCw className={`h-3.5 w-3.5 ${provisioning ? 'animate-spin' : ''}`} />
               </Button>
             )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              title="Edit server"
+              onClick={() => setEditOpen(true)}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
@@ -175,6 +187,13 @@ export function ServerCard({ server, onDeleted, onUpdated }: ServerCardProps) {
         )}
       </CardContent>
     </Card>
+      <EditServerDialog
+        server={server}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onUpdated={onUpdated}
+      />
+    </>
   )
 }
 
