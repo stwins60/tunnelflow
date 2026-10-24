@@ -14,14 +14,30 @@
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen?logo=node.js)](https://nodejs.org)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
 
+<p align="center">
+  <a href="https://cloudflare.africantech.dev">
+    <img src="screenshots/overview.png" alt="TunnelFlow Overview Dashboard" width="100%" style="border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.15);" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://cloudflare.africantech.dev">🌐 <strong>Live Demo</strong></a> &nbsp;•&nbsp;
+  <a href="#quick-start">🚀 <strong>Quick Start</strong></a> &nbsp;•&nbsp;
+  <a href="#screenshots">📸 <strong>Screenshots</strong></a> &nbsp;•&nbsp;
+  <a href="#ai-agent--model-context-protocol-mcp">🤖 <strong>MCP / AI Agents</strong></a> &nbsp;•&nbsp;
+  <a href="#installing-cloudflared-on-kubernetes">☸️ <strong>Kubernetes HA</strong></a>
+</p>
+
 ---
 
 ## Features
 
 | Category | Capability |
 |---|---|
-| **Tunnels** | Create, rename, delete CF tunnels; one-click install tokens (Docker/systemd/direct) |
-| **Servers / Routes** | Provision hostnames end-to-end: tunnel ingress + CNAME DNS in one click |
+| **AI Agents & MCP** | Native Model Context Protocol (MCP) server for Claude Desktop, Cursor, and LLMs to provision tunnels and routes autonomously |
+| **Tunnels** | Create, rename, delete CF tunnels; multi-tab install tokens (Docker, systemd, Kubernetes HA manifest, Direct Run) |
+| **Servers / Routes** | Provision hostnames end-to-end: tunnel ingress + CNAME DNS; live editing with zero-downtime reprovisioning |
+| **Kubernetes HA** | Production-ready `deployment.yaml` with dual replicas, secret management, non-root user, and health probes |
 | **Multi-account** | Store credentials for multiple Cloudflare accounts; set a primary |
 | **Multi-user** | Invite members via token; ADMIN / EDITOR / VIEWER access levels; groups |
 | **API Keys** | Scoped Bearer tokens (`read` / `write` / `deploy` / `admin`) for CI/CD automation |
@@ -34,6 +50,69 @@
 | **Audit Log** | Every action logged with actor, IP, before/after diff; paginated |
 | **Background Sync** | Drift detection between DB and Cloudflare; fires notifications |
 | **Security** | AES-256-GCM encrypted secrets; rate limiting; security headers; httpOnly session cookies |
+
+---
+
+## Screenshots
+
+<details open>
+<summary><b>Click to expand / collapse screenshots</b></summary>
+<br />
+
+| Dashboard Overview | Tunnels Management |
+| :---: | :---: |
+| <img src="screenshots/overview.png" alt="Overview Dashboard" width="100%" /> | <img src="screenshots/tunnels.png" alt="Tunnels Management" width="100%" /> |
+
+| Server Routes & Editing | DNS Records Explorer |
+| :---: | :---: |
+| <img src="screenshots/servers.png" alt="Server Routes" width="100%" /> | <img src="screenshots/dns_records.png" alt="DNS Records" width="100%" /> |
+
+| Multi-Channel Notifications | Audit Log & Activity Trail |
+| :---: | :---: |
+| <img src="screenshots/notifications.png" alt="Notifications Setup" width="100%" /> | <img src="screenshots/audit_log.png" alt="Audit Log" width="100%" /> |
+
+| Route Templates | Team Members & Permissions |
+| :---: | :---: |
+| <img src="screenshots/templates.png" alt="Templates" width="100%" /> | <img src="screenshots/users.png" alt="Users and Permissions" width="100%" /> |
+
+</details>
+
+---
+
+## AI Agent & Model Context Protocol (MCP)
+
+TunnelFlow includes a built-in **Model Context Protocol (MCP)** server, enabling AI assistants like **Claude Desktop**, **Cursor**, or custom autonomous agents to manage your Cloudflare infrastructure using natural language.
+
+### Quick Setup for Claude Desktop / Cursor
+
+Add TunnelFlow to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "tunnelflow": {
+      "command": "node",
+      "args": ["/path/to/tunnelflow/mcp/index.js"],
+      "env": {
+        "TUNNELFLOW_URL": "https://cloudflare.africantech.dev",
+        "TUNNELFLOW_API_KEY": "tfk_your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+Or connect directly via the HTTP JSON-RPC endpoint:
+`POST https://your-tunnelflow-domain/api/mcp` (Bearer Auth supported).
+
+### Available MCP Tools for Agents
+- `list_tunnels`: List all active Cloudflare tunnels, status, and connector counts.
+- `create_tunnel`: Create a new named Cloudflare tunnel and retrieve connector tokens.
+- `list_servers`: List mapped servers, upstreams, protocols, and health status.
+- `create_server`: Provision new hostnames, tunnel ingress rules, and DNS CNAME records.
+- `update_server`: Edit upstream targets, domains, protocols, or force reprovisioning.
+- `delete_server`: Safely deprovision server routes and clean up DNS.
+- `get_audit_log`: Inspect recent administrative changes and drift events.
 
 ---
 
