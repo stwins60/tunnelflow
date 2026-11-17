@@ -35,9 +35,13 @@ export function serverError(e: unknown) {
  * Extract the client IP from a request (for audit logs).
  */
 export function getClientIp(request: Request): string {
+  // The leftmost X-Forwarded-For entry is client-controlled and spoofable.
+  // Prefer the header Cloudflare sets itself, then the proxy-appended (rightmost) entry.
+  const xff = request.headers.get('x-forwarded-for')?.split(',').map((s) => s.trim()).filter(Boolean)
   return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    request.headers.get('cf-connecting-ip') ??
     request.headers.get('x-real-ip') ??
+    xff?.[xff.length - 1] ??
     'unknown'
   )
 }

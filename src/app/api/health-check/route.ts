@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireAuth } from '@/lib/session'
+import { requireAuth } from '@/lib/guards'
 import { resolveWorkspaceId } from '@/lib/auth'
 import { runHealthChecks } from '@/lib/health-checker'
 import { ok, unauthorized, serverError } from '@/lib/api-helpers'

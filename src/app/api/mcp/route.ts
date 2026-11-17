@@ -7,8 +7,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/session'
-import { resolveApiKey } from '@/lib/apikey'
+import { requireAuth } from '@/lib/guards'
+import { getEffectiveAccessLevel } from '@/lib/auth'
+import { resolveApiKey, hasScope } from '@/lib/apikey'
 import { resolveWorkspaceId } from '@/lib/auth'
 import { db, now, newId, type DbServer, type DbTunnel, type DbHealthCheck, type DbDnsRecord, type DbAuditLog, type DbApiKey, type DbUser } from '@/lib/db'
 import { checkUpstream, runHealthChecks } from '@/lib/health-checker'
@@ -126,19 +127,29 @@ const PROMPTS = [
   },
 ]
 
-async function authenticate(req: NextRequest): Promise<{ userId: string; workspaceOwnerId: string } | null> {
+async function authenticate(req: NextRequest): Promise<{ userId: string; workspaceOwnerId: string; isAdmin: boolean } | null> {
   const authHeader = req.headers.get('authorization')
   if (authHeader?.startsWith('Bearer ')) {
     const rawKey = authHeader.slice(7).trim()
     const keyRow = resolveApiKey(rawKey)
     if (keyRow) {
-      return { userId: keyRow.userId, workspaceOwnerId: resolveWorkspaceId(keyRow.userId) }
+      // Keys need the 'read' scope (admin implies all); audit data additionally needs 'admin'.
+      if (!hasScope(keyRow, 'read')) return null
+      return {
+        userId: keyRow.userId,
+        workspaceOwnerId: resolveWorkspaceId(keyRow.userId),
+        isAdmin: hasScope(keyRow, 'admin') && getEffectiveAccessLevel(keyRow.userId) === 'ADMIN',
+      }
     }
   }
 
   const session = await requireAuth().catch(() => null)
   if (session?.userId) {
-    return { userId: session.userId, workspaceOwnerId: resolveWorkspaceId(session.userId) }
+    return {
+      userId: session.userId,
+      workspaceOwnerId: resolveWorkspaceId(session.userId),
+      isAdmin: session.accessLevel === 'ADMIN',
+    }
   }
 
   return null
@@ -188,18 +199,18 @@ export async function POST(req: NextRequest) {
         if (name === 'list_tunnels') {
           toolResult = db.prepare('SELECT * FROM "Tunnel" WHERE "userId" = ? OR "userId" IS NULL LIMIT ?').all(wsId, args.limit ?? 50)
         } else if (name === 'get_tunnel') {
-          const tunnel = db.prepare('SELECT * FROM "Tunnel" WHERE id = ?').get(args.tunnel_id)
+          const tunnel = db.prepare('SELECT * FROM "Tunnel" WHERE id = ? AND ("userId" = ? OR "userId" IS NULL)').get(args.tunnel_id, wsId)
           const servers = tunnel ? db.prepare('SELECT * FROM "Server" WHERE "tunnelId" = ?').all((tunnel as any).id) : []
           toolResult = { tunnel, servers }
         } else if (name === 'list_servers') {
           toolResult = db.prepare('SELECT * FROM "Server" WHERE "userId" = ? OR "userId" IS NULL LIMIT ?').all(wsId, args.limit ?? 50)
         } else if (name === 'get_server') {
-          const server = db.prepare('SELECT * FROM "Server" WHERE id = ?').get(args.server_id)
+          const server = db.prepare('SELECT * FROM "Server" WHERE id = ? AND ("userId" = ? OR "userId" IS NULL)').get(args.server_id, wsId)
           const health = server ? db.prepare('SELECT * FROM "HealthCheck" WHERE "serverId" = ? ORDER BY "checkedAt" DESC LIMIT 5').all(args.server_id) : []
           toolResult = { server, health }
         } else if (name === 'trigger_health_check') {
           if (args.server_id) {
-            const s = db.prepare('SELECT * FROM "Server" WHERE id = ?').get(args.server_id) as DbServer | undefined
+            const s = db.prepare('SELECT * FROM "Server" WHERE id = ? AND ("userId" = ? OR "userId" IS NULL)').get(args.server_id, wsId) as DbServer | undefined
             toolResult = s ? await checkUpstream(s.upstream) : { error: 'Server not found' }
           } else {
             toolResult = await runHealthChecks(wsId)
@@ -224,6 +235,9 @@ export async function POST(req: NextRequest) {
         } else if (name === 'list_dns_records') {
           toolResult = db.prepare('SELECT * FROM "DnsRecord" WHERE "userId" = ? OR "userId" IS NULL LIMIT ?').all(wsId, args.limit ?? 50)
         } else if (name === 'get_audit_logs') {
+          if (!auth.isAdmin) {
+            return NextResponse.json({ jsonrpc: '2.0', error: { code: -32001, message: 'Forbidden: admin access required' }, id })
+          }
           toolResult = db.prepare('SELECT * FROM "AuditLog" ORDER BY "createdAt" DESC LIMIT ?').all(args.limit ?? 25)
         } else {
           return NextResponse.json({ jsonrpc: '2.0', error: { code: -32601, message: `Tool not found: ${name}` }, id })
@@ -256,6 +270,9 @@ export async function POST(req: NextRequest) {
           const servers = db.prepare('SELECT id, name, status FROM "Server" WHERE "userId" = ? OR "userId" IS NULL').all(wsId) as DbServer[]
           data = { total: servers.length, healthy: servers.filter(s => s.status === 'active').length, servers }
         } else if (uri === 'tunnelflow://audit-stream') {
+          if (!auth.isAdmin) {
+            return NextResponse.json({ jsonrpc: '2.0', error: { code: -32001, message: 'Forbidden: admin access required' }, id })
+          }
           data = db.prepare('SELECT * FROM "AuditLog" ORDER BY "createdAt" DESC LIMIT 25').all()
         } else {
           data = { summary: 'TunnelFlow Dashboard Resource' }

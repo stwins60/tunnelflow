@@ -7,7 +7,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { db, now } from '@/lib/db'
-import { requireAdmin, requireAuth, requireEditor } from '@/lib/session'
+import { requireAdmin, requireAuth, requireEditor } from '@/lib/guards'
 import {
   getCfCredentials,
   provisionServer,

@@ -8,7 +8,7 @@
 
 import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
-import { requireAdmin } from '@/lib/session'
+import { requireAdmin } from '@/lib/guards'
 import { getCfCredentials } from '@/lib/cloudflare'
 import { getTunnelToken } from '@/lib/cloudflare/tunnels'
 import { ok, unauthorized, notFound, serverError, getClientIp } from '@/lib/api-helpers'

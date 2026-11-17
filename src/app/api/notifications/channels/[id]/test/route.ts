@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { db, now } from '@/lib/db'
-import { requireAuth } from '@/lib/session'
+import { requireAuth } from '@/lib/guards'
 import { ok, unauthorized, notFound, serverError } from '@/lib/api-helpers'
 import { dbRowToChannel } from '@/lib/notifications'
 import { sendSmtp } from '@/lib/notifications/smtp'

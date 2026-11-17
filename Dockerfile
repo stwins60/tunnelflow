@@ -34,7 +34,9 @@ COPY --from=builder /app/.next         ./.next
 COPY --from=builder /app/public        ./public
 COPY --from=builder /app/mcp           ./mcp
 
-RUN mkdir -p /data
+RUN mkdir -p /data && chown -R node:node /data /app
+
+USER node
 
 EXPOSE 3000
 

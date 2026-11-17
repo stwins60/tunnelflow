@@ -5,7 +5,7 @@
 
 import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
-import { requireAdmin } from '@/lib/session'
+import { requireAdmin } from '@/lib/guards'
 import { provisionServer } from '@/lib/cloudflare'
 import { audit } from '@/lib/auth'
 import { ok, err, unauthorized, notFound, serverError, getClientIp } from '@/lib/api-helpers'

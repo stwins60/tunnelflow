@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { db, now } from '@/lib/db'
 import { hashPassword, resolveWorkspaceId, audit } from '@/lib/auth'
-import { requireAdmin } from '@/lib/session'
+import { requireAdmin } from '@/lib/guards'
 import { ok, err, unauthorized, notFound, serverError, getClientIp } from '@/lib/api-helpers'
 import type { DbUser } from '@/lib/db'
 

@@ -7,7 +7,7 @@
 
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
-import { requireAuth } from '@/lib/session'
+import { requireAuth } from '@/lib/guards'
 import { resolveWorkspaceId } from '@/lib/auth'
 import { resolveApiKey } from '@/lib/apikey'
 import { ok, err, unauthorized, serverError } from '@/lib/api-helpers'

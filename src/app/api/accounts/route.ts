@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireAdmin } from '@/lib/session'
+import { requireAdmin } from '@/lib/guards'
 import { resolveWorkspaceId, audit } from '@/lib/auth'
 import { db, now, newId, type DbCloudflareAccount } from '@/lib/db'
 import { encrypt } from '@/lib/crypto'

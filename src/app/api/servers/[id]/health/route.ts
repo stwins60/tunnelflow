@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireAuth } from '@/lib/session'
+import { requireAuth } from '@/lib/guards'
 import { resolveWorkspaceId } from '@/lib/auth'
 import { db, type DbServer } from '@/lib/db'
 import { getHealthHistory, getLatestHealthCheck, isInMaintenanceWindow } from '@/lib/health-checker'

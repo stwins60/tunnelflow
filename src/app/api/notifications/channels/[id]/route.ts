@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { db, now } from '@/lib/db'
-import { requireAuth } from '@/lib/session'
+import { requireAuth } from '@/lib/guards'
 import { ok, err, unauthorized, notFound, serverError } from '@/lib/api-helpers'
 import { encryptChannelConfig, dbRowToChannel } from '@/lib/notifications'
 import { ALL_EVENTS } from '@/lib/notifications/types'

@@ -4,7 +4,7 @@
  */
 
 import { NextRequest } from 'next/server'
-import { requireAdmin } from '@/lib/session'
+import { requireAdmin } from '@/lib/guards'
 import { resolveWorkspaceId, audit } from '@/lib/auth'
 import { db, now, newId, type DbServer, type DbTunnel } from '@/lib/db'
 import { ok, err, unauthorized, serverError, getClientIp } from '@/lib/api-helpers'

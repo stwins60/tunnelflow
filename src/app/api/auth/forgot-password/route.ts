@@ -42,13 +42,13 @@ export async function POST(req: NextRequest) {
         WHERE "id" = ?
       `).run(token, expiry, now(), user.id)
 
-      // Build the reset URL — use APP_URL env var or fall back to the request origin
-      const origin =
-        process.env.APP_URL ??
-        `${req.nextUrl.protocol}//${req.nextUrl.host}`
-      const resetUrl = `${origin}/reset-password?token=${token}`
+      // Build the reset URL from APP_URL only. The Host header is attacker-controlled,
+      // so falling back to it would allow reset-link poisoning.
+      const origin = process.env.APP_URL?.replace(/\/+$/, '')
 
       try {
+        if (!origin) throw new Error('APP_URL is not set; refusing to build a reset link from the Host header.')
+        const resetUrl = `${origin}/reset-password?token=${token}`
         const mail = buildPasswordResetEmail({ email, resetUrl })
         await sendMail(mail)
       } catch (mailErr) {
