@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireAuth } from '@/lib/session'
+import { requireAuth } from '@/lib/guards'
 import { resolveWorkspaceId, audit } from '@/lib/auth'
 import { db, now, type DbServerTemplate } from '@/lib/db'
 import { ok, unauthorized, notFound, serverError, getClientIp } from '@/lib/api-helpers'

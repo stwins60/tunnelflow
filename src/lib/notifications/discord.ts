@@ -1,4 +1,5 @@
 import type { NotificationPayload, DiscordConfig } from './types'
+import { assertWebhookUrl } from './validate'
 
 // Discord embed colour by event prefix
 function colourForTitle(title: string): number {
@@ -34,6 +35,7 @@ export async function sendDiscord(
     ],
   }
 
+  assertWebhookUrl(config.webhookUrl, ['discord.com', 'discordapp.com', 'ptb.discord.com', 'canary.discord.com'], '/api/webhooks/')
   const res = await fetch(config.webhookUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

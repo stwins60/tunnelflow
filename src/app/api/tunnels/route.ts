@@ -6,7 +6,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { db, now, newId } from '@/lib/db'
-import { requireAuth, requireEditor } from '@/lib/session'
+import { requireAuth, requireEditor } from '@/lib/guards'
 import { resolveWorkspaceId } from '@/lib/auth'
 import { getCfCredentials } from '@/lib/cloudflare'
 import { createTunnel, listTunnels, normalizeTunnelStatus } from '@/lib/cloudflare/tunnels'

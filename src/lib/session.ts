@@ -12,7 +12,16 @@ export interface SessionData {
 
 export const sessionOptions = {
   cookieName: 'tm_session',
-  password: process.env.SESSION_SECRET ?? 'fallback-dev-secret-min-32-chars-long!!',
+  // Lazy getter: read at request time (not build time) and never fall back to a
+  // publicly known secret in production.
+  get password(): string {
+    const secret = process.env.SESSION_SECRET
+    if (secret && secret.length >= 32) return secret
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SESSION_SECRET must be set to a random string of at least 32 characters.')
+    }
+    return 'dev-only-insecure-secret-min-32-chars!!'
+  },
   cookieOptions: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
@@ -31,30 +40,4 @@ export async function getSessionFromRequest(
   res: NextResponse
 ): Promise<IronSession<SessionData>> {
   return getIronSession<SessionData>(req, res, sessionOptions)
-}
-
-export async function requireAuth(): Promise<SessionData> {
-  const session = await getSession()
-  if (!session.isLoggedIn || !session.userId) {
-    throw new Error('Unauthorized')
-  }
-  return session
-}
-
-export async function requireAdmin(): Promise<SessionData> {
-  const session = await requireAuth()
-  if (session.accessLevel !== 'ADMIN') {
-    throw new Error('Forbidden: admin access required')
-  }
-  return session
-}
-
-export async function requireEditor(): Promise<SessionData> {
-  const session = await requireAuth()
-  const rank = { ADMIN: 3, EDITOR: 2, VIEWER: 1 }
-  const level = session.accessLevel ?? 'VIEWER'
-  if ((rank[level as keyof typeof rank] ?? 0) < rank.EDITOR) {
-    throw new Error('Forbidden: editor access required')
-  }
-  return session
 }

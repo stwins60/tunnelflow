@@ -5,7 +5,7 @@
 
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
-import { requireAdmin, requireAuth } from '@/lib/session'
+import { requireAdmin, requireAuth } from '@/lib/guards'
 import { getSetting, setSetting, SETTING_KEYS, getAllSettings, audit } from '@/lib/auth'
 import { verifyToken } from '@/lib/cloudflare/client'
 import { getZone } from '@/lib/cloudflare/zones'

@@ -5,7 +5,7 @@
 
 import { NextRequest } from 'next/server'
 import { db, now } from '@/lib/db'
-import { requireAdmin } from '@/lib/session'
+import { requireAdmin } from '@/lib/guards'
 import { resolveWorkspaceId } from '@/lib/auth'
 import { ok, err, unauthorized, notFound, serverError } from '@/lib/api-helpers'
 import type { DbUserGroup } from '@/lib/db'

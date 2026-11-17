@@ -5,7 +5,7 @@
 
 import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
-import { requireAdmin } from '@/lib/session'
+import { requireAdmin } from '@/lib/guards'
 import { ok, unauthorized, serverError } from '@/lib/api-helpers'
 import type { DbAuditLogWithUser } from '@/lib/db'
 

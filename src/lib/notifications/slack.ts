@@ -1,4 +1,5 @@
 import type { NotificationPayload, SlackConfig } from './types'
+import { assertWebhookUrl } from './validate'
 
 export async function sendSlack(
   config: SlackConfig,
@@ -30,6 +31,7 @@ export async function sendSlack(
     ],
   }
 
+  assertWebhookUrl(config.webhookUrl, ['hooks.slack.com'], '/services/')
   const res = await fetch(config.webhookUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

@@ -4,7 +4,7 @@
  */
 
 import { NextRequest } from 'next/server'
-import { requireAdmin } from '@/lib/session'
+import { requireAdmin } from '@/lib/guards'
 import { resolveWorkspaceId } from '@/lib/auth'
 import { ok, unauthorized, serverError } from '@/lib/api-helpers'
 import { getDnsRecords, getDnsRecordsWithHistory, countDnsRecords, getDnsStats } from '@/lib/dns-audit'

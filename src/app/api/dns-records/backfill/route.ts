@@ -5,7 +5,7 @@
  */
 
 import { NextRequest } from 'next/server'
-import { requireAdmin } from '@/lib/session'
+import { requireAdmin } from '@/lib/guards'
 import { resolveWorkspaceId } from '@/lib/auth'
 import { ok, unauthorized, serverError } from '@/lib/api-helpers'
 import { backfillDnsRecords } from '@/lib/dns-backfill'

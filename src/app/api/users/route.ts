@@ -2,7 +2,7 @@
  * GET  /api/users  — list all users in the caller's workspace (admin only)
  */
 
-import { requireAdmin } from '@/lib/session'
+import { requireAdmin } from '@/lib/guards'
 import { resolveWorkspaceId } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { ok, unauthorized, serverError } from '@/lib/api-helpers'

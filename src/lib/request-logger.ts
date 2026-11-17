@@ -44,7 +44,7 @@ export function logRequest(
     path:        url.pathname,
     status:      meta.status,
     durationMs:  meta.durationMs,
-    ip:          req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    ip:          req.headers.get('cf-connecting-ip')
                  ?? req.headers.get('x-real-ip')
                  ?? undefined,
     userId:      meta.userId,

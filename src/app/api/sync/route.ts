@@ -4,7 +4,7 @@
  */
 
 import { NextRequest } from 'next/server'
-import { requireAuth, requireEditor } from '@/lib/session'
+import { requireAuth, requireEditor } from '@/lib/guards'
 import { syncWithCloudflare } from '@/lib/cloudflare'
 import { isSetupComplete, resolveWorkspaceId } from '@/lib/auth'
 import { ok, unauthorized, serverError } from '@/lib/api-helpers'
